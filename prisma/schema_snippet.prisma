@@ -1,0 +1,19 @@
+model CachedProvider {
+  id          String   @id @default(cuid())
+  osmId       String   @unique
+  name        String
+  type        String   // doctor, clinic, hospital
+  specialty   String?
+  address     String?
+  phone       String?
+  website     String?
+  latitude    Float
+  longitude   Float
+  lastFetched DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([latitude, longitude])
+  @@index([type])
+  @@index([specialty])
+}
