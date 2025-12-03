@@ -23,16 +23,22 @@ export async function GET(request) {
         const maxLon = lon + lonDelta;
 
         // 2. Check DB Cache for blood banks
-        const cachedProviders = await prisma.cachedProvider.findMany({
-            where: {
-                latitude: { gte: minLat, lte: maxLat },
-                longitude: { gte: minLon, lte: maxLon },
-                OR: [
-                    { type: 'blood_bank' },
-                    { type: { contains: 'blood' } }
-                ]
-            }
-        });
+        let cachedProviders = [];
+        try {
+            cachedProviders = await prisma.cachedProvider.findMany({
+                where: {
+                    latitude: { gte: minLat, lte: maxLat },
+                    longitude: { gte: minLon, lte: maxLon },
+                    OR: [
+                        { type: 'blood_bank' },
+                        { type: { contains: 'blood' } }
+                    ]
+                }
+            });
+        } catch (dbReadError) {
+            console.warn('Database read failed, skipping cache check:', dbReadError.message);
+            // Continue with empty cache (will trigger live fetch)
+        }
 
         // 3. Check Freshness (TTL: 24 hours)
         const now = Date.now();

@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
+// Force rebuild
+// Trigger rebuild
 const nextConfig = {
   // Performance optimizations
+  reactStrictMode: false,
   compress: true,
   poweredByHeader: false,
 

@@ -2,6 +2,7 @@
 import { Alert, Button } from 'react-bootstrap'
 import { AlertCircle, Mail } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useStackApp } from "@stackframe/stack";
 import { useState } from 'react'
 
 export default function VerificationBanner() {
@@ -9,29 +10,22 @@ export default function VerificationBanner() {
     const [resending, setResending] = useState(false)
     const [message, setMessage] = useState('')
 
-    if (!user || user.email_verified) {
+    if (!user || user.primaryEmailVerified) {
         return null
     }
+
+    const app = useStackApp();
 
     const handleResendEmail = async () => {
         setResending(true)
         setMessage('')
 
         try {
-            const response = await fetch('/api/auth/resend-verification', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-            })
-
-            const data = await response.json()
-
-            if (response.ok) {
-                setMessage('Verification email sent! Please check your inbox.')
-            } else {
-                setMessage(data.message || 'Failed to send verification email')
-            }
+            await user.sendVerificationEmail();
+            setMessage('Verification email sent! Please check your inbox.')
         } catch (error) {
-            setMessage('An error occurred. Please try again.')
+            setMessage('Failed to send verification email. Please try again.')
+            console.error(error);
         } finally {
             setResending(false)
         }

@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'UpcharSaathi',
   webDir: 'mobile-dist',
   server: {
-    url: 'https://upchar-saathi.vercel.app',
+    url: 'https://usmb.vercel.app',
     cleartext: true,
     androidScheme: 'https'
   }

@@ -3,27 +3,27 @@ export const healthFeatures = [
     {
         id: 'first-aid',
         icon: 'HeartPulse',
-        title: 'Emergency First Aid',
+        title: 'Emergency Response',
         description: [
-            'Step-by-Step Guides',
-            'CPR & Life Support',
-            'Emergency Contacts'
+            'Instant CPR Protocols',
+            'Trauma Management',
+            'Emergency Hotlines'
         ],
         iconBg: 'rgba(239, 68, 68, 0.1)',
         iconColor: '#ef4444',
         bulletColor: 'bg-danger',
         buttonVariant: 'outline-danger',
         route: '/first-aid',
-        buttonText: 'View Guides'
+        buttonText: 'Access Protocols'
     },
     {
         id: 'consultation',
         icon: 'Stethoscope',
-        title: 'Expert Consultation',
+        title: 'Clinical Consultation',
         description: [
-            'Top Specialists',
-            'Video Consultations',
-            'Instant Booking'
+            'Board-Certified Specialists',
+            'Telemedicine Integration',
+            'Digital Prescriptions'
         ],
         iconBg: 'rgba(244, 63, 94, 0.1)',
         iconColor: '#f43f5e',
@@ -31,39 +31,39 @@ export const healthFeatures = [
         buttonVariant: 'outline-light',
         buttonStyle: { borderColor: '#f43f5e', color: '#f43f5e' },
         route: '/find-doctors',
-        buttonText: 'Find Doctors'
+        buttonText: 'Consult Specialist'
     },
     {
-        id: 'trending',
-        icon: 'TrendingUp',
-        title: 'Trending Health',
+        id: 'blood-bank',
+        icon: 'Activity',
+        title: 'Blood Network',
         description: [
-            'Seasonal Flu',
-            'Viral Outbreaks',
-            'Local Health Alerts'
+            'Real-time Donor Matching',
+            'Blood Type Availability',
+            'Urgent Requests'
         ],
-        iconBg: 'rgba(239, 68, 68, 0.1)',
-        iconColor: '#ef4444',
+        iconBg: 'rgba(220, 38, 38, 0.1)',
+        iconColor: '#dc2626',
         bulletColor: 'bg-danger',
         buttonVariant: 'outline-danger',
-        route: '#',
-        buttonText: 'View Trends'
+        route: '/blood-bank',
+        buttonText: 'Find Donors'
     },
     {
         id: 'wellness',
         icon: 'Lightbulb',
-        title: 'Daily Wellness',
+        title: 'Preventive Care',
         description: [
-            'Hydration',
-            'Movement',
-            'Mindfulness'
+            'Health Vitals Tracking',
+            'Lifestyle Analytics',
+            'Wellness Recommendations'
         ],
         iconBg: 'rgba(252, 165, 165, 0.1)',
         iconColor: '#fca5a5',
         bulletColor: 'bg-danger',
         buttonVariant: 'outline-danger',
         route: '#',
-        buttonText: 'Wellness Tips'
+        buttonText: 'Track Health'
     }
 ];
 
@@ -102,15 +102,16 @@ export const styles = {
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        boxShadow: '0 1px 3px rgba(220, 38, 38, 0.1)'
+        boxShadow: '0 10px 25px -5px rgba(220, 38, 38, 0.15), 0 8px 10px -6px rgba(220, 38, 38, 0.1)',
+        transition: 'all 0.3s ease'
     },
     iconContainerStyle: {
-        width: '48px',
-        height: '48px',
-        borderRadius: '12px',
+        width: '56px',
+        height: '56px',
+        borderRadius: '16px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: '1rem'
+        marginBottom: '1.5rem'
     }
 };

@@ -17,7 +17,9 @@ const icon = L.icon({
 
 function ChangeView({ center, zoom }) {
     const map = useMap();
-    map.setView(center, zoom);
+    useEffect(() => {
+        map.setView(center, zoom);
+    }, [center, zoom, map]);
     return null;
 }
 

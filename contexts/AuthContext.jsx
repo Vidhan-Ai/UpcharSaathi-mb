@@ -1,105 +1,86 @@
 'use client'
 import { createContext, useContext, useState, useEffect } from 'react'
+import { useUser, useStackApp } from "@stackframe/stack";
 
 const AuthContext = createContext({})
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const user = useUser();
+  const app = useStackApp();
+  const [loading, setLoading] = useState(true);
+  const [localProfile, setLocalProfile] = useState({});
 
-  // Check for existing session on initial load
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        // Check if there's an active session in localStorage
-        const storedUser = localStorage.getItem('upcharSaathiUser')
-        if (storedUser) {
-          setUser(JSON.parse(storedUser))
+    // Stack Auth handles session, so we just sync loading state
+    console.log("AuthContext: user state changed", user);
+    if (user !== undefined) {
+      setLoading(false);
+
+      if (user) {
+        // Load local profile data
+        try {
+          const storageKey = `upcharSaathi_profile_${user.id}`;
+          const savedProfile = JSON.parse(localStorage.getItem(storageKey) || '{}');
+          setLocalProfile(savedProfile);
+        } catch (e) {
+          console.error("Failed to load local profile", e);
         }
-      } catch (error) {
-        console.error('Session check failed:', error)
-      } finally {
-        setLoading(false)
+      } else {
+        setLocalProfile({});
       }
     }
-
-    checkSession()
-  }, [])
+  }, [user]);
 
   const login = async (email, password) => {
-    setLoading(true)
+    // This is now handled by Stack Auth UI components or app.signIn
+    // We keep this for compatibility if needed, but UI should use Stack components
     try {
-      // Make API request to login endpoint
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed')
-      }
-
-      // Store the user data in state and localStorage
-      setUser(data.user)
-      localStorage.setItem('upcharSaathiUser', JSON.stringify(data.user))
-      return data.user
+      await app.signInWithCredential({ email, password });
     } catch (error) {
-      console.error('Login error:', error)
-      throw error
-    } finally {
-      setLoading(false)
+      console.error("Login error", error);
+      throw error;
     }
   }
 
   const signup = async (name, email, password, phone, dob, gender, blood_group) => {
-    setLoading(true)
+    // Stack Auth signup. Note: Custom fields like phone, dob etc need to be handled 
+    // either via metadata or separate profile update after signup.
+    // For now we just do the basic signup.
     try {
-      // Make API request to signup endpoint
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, phone, dob, gender, blood_group }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Signup failed')
-      }
-
-      // After signup, automatically log the user in
-      setUser(data.user)
-      localStorage.setItem('upcharSaathiUser', JSON.stringify(data.user))
-      return data.user
+      await app.signUpWithCredential({ email, password, name });
+      // TODO: Save extra fields to a profile database or user metadata
     } catch (error) {
-      console.error('Signup error:', error)
-      throw error
-    } finally {
-      setLoading(false)
+      console.error("Signup error", error);
+      throw error;
     }
   }
 
-  const logout = () => {
-    // Clear user from state and localStorage
-    setUser(null)
-    localStorage.removeItem('upcharSaathiUser')
+  const logout = async () => {
+    await app.signOut();
+    setLocalProfile({});
   }
 
-  // Add medical record to user data
+  const updateProfile = async (data) => {
+    if (!user) return;
+    try {
+      const storageKey = `upcharSaathi_profile_${user.id}`;
+      const updatedProfile = { ...localProfile, ...data };
+      localStorage.setItem(storageKey, JSON.stringify(updatedProfile));
+      setLocalProfile(updatedProfile);
+      return true;
+    } catch (error) {
+      console.error("Failed to update profile", error);
+      throw error;
+    }
+  }
+
+  // Add medical record to user data (stored in localStorage for now)
   const addMedicalRecord = (recordData) => {
     if (!user) return false
 
     try {
-      // Create a deep copy of the user
-      const updatedUser = JSON.parse(JSON.stringify(user))
-
-      // Initialize medicalRecords array if it doesn't exist
-      if (!updatedUser.medicalRecords) {
-        updatedUser.medicalRecords = []
-      }
+      const storageKey = `upcharSaathi_medicalRecords_${user.id}`;
+      const existingRecords = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
       // Add timestamp to record
       const record = {
@@ -109,11 +90,15 @@ export function AuthProvider({ children }) {
       }
 
       // Add the new record to the array
-      updatedUser.medicalRecords.unshift(record) // Add to beginning of array for chronological sorting (newest first)
+      const updatedRecords = [record, ...existingRecords];
 
-      // Update state and localStorage
-      setUser(updatedUser)
-      localStorage.setItem('upcharSaathiUser', JSON.stringify(updatedUser))
+      // Update localStorage
+      localStorage.setItem(storageKey, JSON.stringify(updatedRecords));
+
+      // Force update to ensure UI reflects changes immediately (by updating a dummy state or similar if needed, 
+      // but here we might rely on the component re-fetching. 
+      // Ideally we should have medicalRecords in state too, but for now let's leave it as is 
+      // since the ProfilePage calls getMedicalRecords() on render/effect).
 
       return true
     } catch (error) {
@@ -124,22 +109,28 @@ export function AuthProvider({ children }) {
 
   // Get all medical records for the current user
   const getMedicalRecords = () => {
-    if (!user || !user.medicalRecords) return []
-    return user.medicalRecords
+    if (!user) return []
+    try {
+      const storageKey = `upcharSaathi_medicalRecords_${user.id}`;
+      return JSON.parse(localStorage.getItem(storageKey) || '[]');
+    } catch (e) {
+      return [];
+    }
   }
 
   // Delete a medical record
   const deleteMedicalRecord = (recordId) => {
-    if (!user || !user.medicalRecords) return false
+    if (!user) return false
 
     try {
-      const updatedUser = JSON.parse(JSON.stringify(user))
-      updatedUser.medicalRecords = updatedUser.medicalRecords.filter(
+      const storageKey = `upcharSaathi_medicalRecords_${user.id}`;
+      const existingRecords = JSON.parse(localStorage.getItem(storageKey) || '[]');
+
+      const updatedRecords = existingRecords.filter(
         record => record.id !== recordId
       )
 
-      setUser(updatedUser)
-      localStorage.setItem('upcharSaathiUser', JSON.stringify(updatedUser))
+      localStorage.setItem(storageKey, JSON.stringify(updatedRecords));
       return true
     } catch (error) {
       console.error('Failed to delete medical record:', error)
@@ -147,12 +138,25 @@ export function AuthProvider({ children }) {
     }
   }
 
+  // Mocking the user object structure expected by the app if needed
+  // Stack user has { id, email, displayName, ... }
+  // The app might expect { name, ... }
+  const extendedUser = user ? {
+    ...user,
+    ...localProfile, // Merge local profile data (phone, dob, etc.)
+    name: localProfile.name || user.displayName || user.primaryEmail?.split('@')[0] || user.id,
+    email: user.primaryEmail,
+    primaryEmailVerified: user.primaryEmailVerified,
+    medicalRecords: getMedicalRecords()
+  } : null;
+
   const value = {
-    user,
+    user: extendedUser,
     loading,
     login,
     signup,
     logout,
+    updateProfile,
     isAuthenticated: !!user,
     addMedicalRecord,
     getMedicalRecords,

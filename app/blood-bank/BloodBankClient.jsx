@@ -71,12 +71,19 @@ export default function BloodBankClient() {
         setError(null);
 
         try {
-            const permissionStatus = await Geolocation.checkPermissions();
+            try {
+                const permissionStatus = await Geolocation.checkPermissions();
 
-            if (permissionStatus.location !== 'granted') {
-                const requestStatus = await Geolocation.requestPermissions();
-                if (requestStatus.location !== 'granted') {
-                    throw new Error('Location permission denied. Please enable it in settings.');
+                if (permissionStatus.location !== 'granted') {
+                    const requestStatus = await Geolocation.requestPermissions();
+                    if (requestStatus.location !== 'granted') {
+                        throw new Error('Location permission denied. Please enable it in settings.');
+                    }
+                }
+            } catch (permErr) {
+                // Ignore 'Not implemented on web' error
+                if (permErr.message !== 'Not implemented on web.') {
+                    console.warn("Permission request failed or not needed:", permErr);
                 }
             }
 

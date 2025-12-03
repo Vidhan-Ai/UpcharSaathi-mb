@@ -24,12 +24,18 @@ export async function GET(request) {
         const maxLon = lon + lonDelta;
 
         // 2. Check DB Cache
-        const cachedProviders = await prisma.cachedProvider.findMany({
-            where: {
-                latitude: { gte: minLat, lte: maxLat },
-                longitude: { gte: minLon, lte: maxLon },
-            }
-        });
+        let cachedProviders = [];
+        try {
+            cachedProviders = await prisma.cachedProvider.findMany({
+                where: {
+                    latitude: { gte: minLat, lte: maxLat },
+                    longitude: { gte: minLon, lte: maxLon },
+                }
+            });
+        } catch (dbReadError) {
+            console.warn('Database read failed, skipping cache check:', dbReadError.message);
+            // Continue with empty cache (will trigger live fetch)
+        }
 
         // 3. Check Freshness (TTL: 24 hours)
         const now = Date.now();

@@ -1,128 +1,68 @@
 'use client'
-import { useState, useEffect } from 'react'
-import { useAuth } from '@/contexts/AuthContext'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { Button, Container, Row, Col, Form, Alert } from "react-bootstrap"
-import Link from 'next/link'
+import { SignIn } from "@stackframe/stack";
+import { Container, Row, Col } from "react-bootstrap";
+import { motion } from 'framer-motion';
+import { Activity, Stethoscope } from 'lucide-react';
 
 export default function Login() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-
-  const { login, isAuthenticated, user } = useAuth()
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const verified = searchParams.get('verified')
-
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      router.push('/')
-    }
-  }, [isAuthenticated, user, router])
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setIsLoading(true)
-
-    try {
-      await login(email, password)
-      router.push('/')
-    } catch (error) {
-      setError(error.message || 'Invalid email or password')
-      console.error('Login failed:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ background: 'linear-gradient(to right, #fef2f2, #ffe4e6, #fef2f2)' }}>
-      <Container>
-        <Row className="justify-content-center">
-          <Col md={6} lg={5}>
-            <div style={{
-              background: '#ffffff',
-              border: '1px solid #fecaca',
-              borderRadius: '1rem',
-              padding: '2rem',
-              boxShadow: '0 4px 20px rgba(220, 38, 38, 0.05)'
-            }}>
-              <h2 className="text-2xl fw-bold text-center mb-4 text-dark">Login to UpcharSaathi</h2>
-
-              {verified && (
-                <Alert variant="success">
-                  Email verified successfully! You can now login.
-                </Alert>
-              )}
-
-              {error && (
-                <Alert variant="danger" dismissible onClose={() => setError('')}>
-                  {error}
-                </Alert>
-              )}
-
-              <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3">
-                  <Form.Label className="text-muted">Email</Form.Label>
-                  <Form.Control
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="bg-light text-dark border-light"
-                    style={{ border: '1px solid #fecaca' }}
-                    required
-                    autoComplete="email"
-                  />
-                </Form.Group>
-
-                <Form.Group className="mb-4">
-                  <Form.Label className="text-muted">Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="bg-light text-dark border-light"
-                    style={{ border: '1px solid #fecaca' }}
-                    required
-                    autoComplete="current-password"
-                  />
-                </Form.Group>
-
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-100 border-0 fw-bold"
-                  style={{
-                    background: 'linear-gradient(to right, #dc2626, #fb7185)',
-                    transition: 'all 0.3s',
-                    boxShadow: '0 4px 12px rgba(220, 38, 38, 0.2)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.transform = 'translateY(-2px)'
-                    e.target.style.boxShadow = '0 6px 16px rgba(220, 38, 38, 0.3)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.transform = 'translateY(0)'
-                    e.target.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.2)'
-                  }}
+    return (
+        <div className="flex-grow-1 d-flex align-items-center justify-content-center position-relative py-5 overflow-hidden" style={{ zIndex: 1 }}>
+            {/* Background Elements */}
+            <div className="position-absolute w-100 h-100" style={{ zIndex: -1, opacity: 0.05, top: 0, left: 0 }}>
+                <motion.div
+                    animate={{
+                        rotate: 360,
+                        scale: [1, 1.2, 1],
+                    }}
+                    transition={{
+                        duration: 20,
+                        repeat: Infinity,
+                        ease: "linear"
+                    }}
+                    style={{ position: 'absolute', top: '10%', left: '10%' }}
                 >
-                  {isLoading ? 'Logging in...' : 'Login'}
-                </Button>
-              </Form>
-
-              <p className="mt-4 text-center text-muted">
-                Don't have an account?{' '}
-                <Link href="/auth/signup" className="text-decoration-none" style={{ color: '#dc2626', fontWeight: '600' }}>
-                  Sign up
-                </Link>
-              </p>
+                    <Activity size={200} className="text-danger" />
+                </motion.div>
+                <motion.div
+                    animate={{
+                        y: [0, -50, 0],
+                        rotate: -10
+                    }}
+                    transition={{
+                        duration: 10,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                    style={{ position: 'absolute', bottom: '15%', right: '10%' }}
+                >
+                    <Stethoscope size={250} className="text-primary" />
+                </motion.div>
             </div>
-          </Col>
-        </Row>
-      </Container>
-    </div>
-  )
+
+            <Container>
+                <Row className="justify-content-center">
+                    <Col md={6} lg={5}>
+                        <div className="animate-fade-in" style={{
+                            background: '#ffffff',
+                            border: '1px solid #fecaca',
+                            borderRadius: '1rem',
+                            padding: '2rem',
+                            boxShadow: '0 10px 30px rgba(220, 38, 38, 0.1)'
+                        }}>
+                            <div className="d-flex justify-content-center mb-4">
+                                <div className="bg-danger bg-opacity-10 p-3 rounded-circle">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" /><polyline points="10 17 15 12 10 7" /><line x1="15" y1="12" x2="3" y2="12" /></svg>
+                                </div>
+                            </div>
+
+                            {/* Stack Auth Component */}
+                            <div className="stack-auth-wrapper">
+                                <SignIn fullPage={false} />
+                            </div>
+                        </div>
+                    </Col>
+                </Row>
+            </Container>
+        </div>
+    )
 }

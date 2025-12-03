@@ -28,15 +28,16 @@ export default function FeatureCard({ feature, delay = 0 }) {
         >
             <Card style={styles.cardStyle} className="h-100 custom-card border-0 shadow-sm">
                 <Card.Body className="d-flex flex-column p-4">
-                    <div
+                    <motion.div
+                        whileHover={{ scale: 1.1, rotate: 5 }}
                         style={{
                             ...styles.iconContainerStyle,
                             background: feature.iconBg,
                             color: feature.iconColor
                         }}
                     >
-                        <IconComponent size={24} />
-                    </div>
+                        <IconComponent size={28} />
+                    </motion.div>
 
                     <h4 className="fw-bold mb-4 text-dark">{feature.title}</h4>
 

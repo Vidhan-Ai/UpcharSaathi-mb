@@ -1,5 +1,4 @@
 /* Bootstrap 5 CSS */
-@import 'bootstrap/dist/css/bootstrap.min.css';
 
 body {
   font-family: 'Inter', Arial, Helvetica, sans-serif;
@@ -35,6 +34,18 @@ body {
   --border: #fecaca;
   --input: #fecaca;
   --ring: #dc2626;
+
+  /* Stack Auth Theme Variables */
+  --stack-primary: #dc2626;
+  --stack-primary-foreground: #ffffff;
+  --stack-radius: 0.5rem;
+  --stack-background: #ffffff;
+  --stack-foreground: #0f172a;
+  --stack-muted: #ffe4e6;
+  --stack-muted-foreground: #fb7185;
+  --stack-border: #fecaca;
+  --stack-input: #fecaca;
+  --stack-ring: #dc2626;
 }
 
 @keyframes fadeIn {
@@ -70,4 +81,647 @@ body {
   box-shadow: 0 10px 30px rgba(220, 38, 38, 0.15);
   transform: translateY(-5px);
   z-index: 10;
+}
+
+/* Modern Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #fca5a5;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #dc2626;
+}
+
+/* Healthcare Background Pattern */
+.healthcare-bg {
+  background-color: #fef2f2;
+  background-image: radial-gradient(#fee2e2 2px, transparent 2px), radial-gradient(#fee2e2 2px, transparent 2px);
+  background-size: 32px 32px;
+  background-position: 0 0, 16px 16px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+/* Floating Elements Animation */
+@keyframes float {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+.floating-icon {
+  position: fixed;
+  opacity: 0.03;
+  animation-delay: 1s;
+}
+
+.floating-icon:nth-child(3) {
+  bottom: 15%;
+  left: 15%;
+  animation-delay: 2s;
+}
+
+.floating-icon:nth-child(4) {
+  bottom: 25%;
+  right: 5%;
+  animation-delay: 3s;
+}
+
+.floating-icon:nth-child(5) {
+  top: 50%;
+  left: 50%;
+  animation-delay: 4s;
+}
+
+.stack-auth-wrapper {
+  width: 100%;
+  max-width: 400px;
+  /* Prevents it from getting too wide on desktop */
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+  --stack-accent: #dc2626;
+  /* Force Red Variable */
+}
+
+.stack-auth-wrapper button,
+.stack-auth-wrapper a.button {
+  width: 100% !important;
+  height: 48px !important;
+  /* Taller for better touch target */
+  border-radius: 12px !important;
+  /* Softer, modern corners */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 500 !important;
+  font-size: 15px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+  margin-bottom: 12px !important;
+}
+
+/* Fix Icon Spacing inside buttons */
+.stack-auth-wrapper button svg,
+.stack-auth-wrapper button img {
+  margin-right: 10px !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* 3. Primary Action Buttons (Passkey, Send Email, Sign In) */
+/* We target buttons that have a colored background or are 'submit' types */
+.stack-auth-wrapper button[type="submit"],
+.stack-auth-wrapper button[data-variant="primary"],
+.stack-auth-wrapper button[style*="background-color: rgb(37, 99, 235)"],
+/* Catches the default Blue */
+.stack-auth-wrapper button[style*="background-color: #2563eb"] {
+  background-color: var(--bs-primary) !important;
+  /* UpcharSaathi Red */
+  color: rgb(245, 158, 158) !important;
+  border: 1px solid var(--bs-primary) !important;
+}
+
+.stack-auth-wrapper button[type="submit"]:hover {
+  background-color: #b91c1c !important;
+  /* Darker Red on hover */
+  transform: translateY(-1px);
+}
+
+/* 4. Social Login Buttons (GitHub, Google) */
+/* Give them a clean white look with border */
+.stack-auth-wrapper button[data-provider],
+/* often used by libraries for social */
+.stack-auth-wrapper button:not([type="submit"]):not([role="tab"]) {
+  background-color: #f4a0a0 !important;
+  color: #1f2937 !important;
+  border: 1px solid #f6c0c6 !important;
+  transition: all 0.2s ease !important;
+}
+
+.stack-auth-wrapper button[data-provider]:hover,
+.stack-auth-wrapper button:not([type="submit"]):not([role="tab"]):hover {
+  background-color: #eb8585 !important;
+  border-color: #fd9090 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* GitHub Specifics - Make icon black */
+.stack-auth-wrapper button[data-provider="github"] {
+  color: #000000 !important;
+}
+
+.stack-auth-wrapper button[data-provider="github"] svg {
+  fill: currentColor !important;
+}
+
+/* 5. The "Email / Password" Toggle (Fixing the raw table look) */
+/* Stack Auth likely uses a div or ul with role="tablist" */
+.stack-auth-wrapper [role="tablist"] {
+  display: flex !important;
+  background-color: #f3f4f6 !important;
+  padding: 4px !important;
+  border-radius: 10px !important;
+  margin-bottom: 20px !important;
+  border: 1px solid #e5e7eb !important;
+  width: 100% !important;
+}
+
+.stack-auth-wrapper [role="tab"],
+.stack-auth-wrapper button[role="tab"] {
+  flex: 1 !important;
+  background-color: transparent !important;
+  color: #6b7280 !important;
+  border: none !important;
+  height: 36px !important;
+  margin: 0 !important;
+  font-size: 13px !important;
+  box-shadow: none !important;
+}
+
+/* The Active Tab */
+.stack-auth-wrapper [role="tab"][data-state="active"],
+.stack-auth-wrapper [role="tab"][aria-selected="true"] {
+  background-color: white !important;
+  color: var(--bs-primary) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 6. Input Fields */
+.stack-auth-wrapper input {
+  height: 48px !important;
+  border-radius: 12px !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 0 16px !important;
+  background-color: #fff !important;
+  font-size: 15px !important;
+  width: 100% !important;
+  margin-bottom: 16px !important;
+}
+
+.stack-auth-wrapper input:focus {
+  outline: none !important;
+  height: 100%;
+  z-index: -1;
+}
+
+/* Floating Elements Animation */
+@keyframes float {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+.floating-icon {
+  position: fixed;
+  opacity: 0.03;
+  color: #dc2626;
+  animation-delay: 1s;
+}
+
+.floating-icon:nth-child(3) {
+  bottom: 15%;
+  left: 15%;
+  animation-delay: 2s;
+}
+
+.floating-icon:nth-child(4) {
+  bottom: 25%;
+  right: 5%;
+  animation-delay: 3s;
+}
+
+.floating-icon:nth-child(5) {
+  top: 50%;
+  left: 50%;
+  animation-delay: 4s;
+}
+
+/* =========================================
+   Stack Auth UI Overrides (UpcharSaathi Theme)
+   ========================================= */
+
+/* 1. Container Scoping */
+/* Ensure you wrap your <StackAuth> component in a div with class="stack-auth-wrapper" */
+.stack-auth-wrapper {
+  width: 100%;
+  max-width: 400px;
+  /* Prevents it from getting too wide on desktop */
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+  --stack-accent: #dc2626;
+  /* Force Red Variable */
+}
+
+/* 2. Global Button Fixes (Uniformity) */
+/* Targets all buttons inside the wrapper */
+.stack-auth-wrapper button,
+.stack-auth-wrapper a.button {
+  width: 100% !important;
+  height: 48px !important;
+  /* Taller for better touch target */
+  border-radius: 12px !important;
+  /* Softer, modern corners */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 500 !important;
+  font-size: 15px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+  margin-bottom: 12px !important;
+}
+
+/* Fix Icon Spacing inside buttons */
+.stack-auth-wrapper button svg,
+.stack-auth-wrapper button img {
+  margin-right: 10px !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* 3. Primary Action Buttons (Passkey, Send Email, Sign In) */
+/* We target buttons that have a colored background or are 'submit' types */
+.stack-auth-wrapper button[type="submit"],
+.stack-auth-wrapper button[data-variant="primary"],
+.stack-auth-wrapper button[style*="background-color: rgb(37, 99, 235)"],
+/* Catches the default Blue */
+.stack-auth-wrapper button[style*="background-color: #2563eb"] {
+  background-color: #ef4444 !important;
+  /* Light Red */
+  color: white !important;
+  border: 1px solid #ef4444 !important;
+}
+
+.stack-auth-wrapper button[type="submit"]:hover {
+  background-color: #dc2626 !important;
+  /* Standard Red on hover */
+  transform: translateY(-1px);
+}
+
+/* 4. Social Login Buttons (GitHub, Google) */
+/* Give them a clean white look with border */
+.stack-auth-wrapper button[data-provider],
+/* often used by libraries for social */
+.stack-auth-wrapper button:not([type="submit"]):not([role="tab"]) {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  border: 1px solid #e5e7eb !important;
+  transition: all 0.2s ease !important;
+}
+
+.stack-auth-wrapper button[data-provider]:hover,
+.stack-auth-wrapper button:not([type="submit"]):not([role="tab"]):hover {
+  background-color: #f3f4f6 !important;
+  border-color: #c5c8cc !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* GitHub Specifics - Make icon black */
+.stack-auth-wrapper button[data-provider="github"] {
+  color: #000000 !important;
+}
+
+.stack-auth-wrapper button[data-provider="github"] svg {
+  fill: currentColor !important;
+}
+
+/* 5. The "Email / Password" Toggle (Fixing the raw table look) */
+/* Stack Auth likely uses a div or ul with role="tablist" */
+.stack-auth-wrapper [role="tablist"] {
+  display: flex !important;
+  background-color: #f3f4f6 !important;
+  padding: 4px !important;
+  border-radius: 10px !important;
+  margin-bottom: 20px !important;
+  border: 1px solid #e5e7eb !important;
+  width: 100% !important;
+}
+
+.stack-auth-wrapper [role="tab"],
+.stack-auth-wrapper button[role="tab"] {
+  flex: 1 !important;
+  background-color: transparent !important;
+  color: #6b7280 !important;
+  border: none !important;
+  height: 36px !important;
+  margin: 0 !important;
+  font-size: 13px !important;
+  box-shadow: none !important;
+}
+
+/* The Active Tab */
+.stack-auth-wrapper [role="tab"][data-state="active"],
+.stack-auth-wrapper [role="tab"][aria-selected="true"] {
+  background-color: white !important;
+  color: var(--bs-primary) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 6. Input Fields */
+.stack-auth-wrapper input {
+  height: 48px !important;
+  border-radius: 12px !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 0 16px !important;
+  background-color: #fff !important;
+  font-size: 15px !important;
+  width: 100% !important;
+  margin-bottom: 16px !important;
+}
+
+.stack-auth-wrapper input:focus {
+  outline: none !important;
+  border-color: var(--bs-primary) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+/* Hide the "Secured by Stack Auth" badge if desired, or style it */
+/* Hide the "Secured by Stack Auth" badge */
+.stack-auth-footer,
+.stack-auth-wrapper a[href*="stack-auth"] {
+  display: none !important;
+}
+
+/* =========================================
+   Fix: Password Show/Hide Button Position
+   ========================================= */
+
+/* 1. Make the container relative so we can place the button inside */
+/* We target any div that directly contains an input */
+.stack-auth-wrapper div:has(> input) {
+  position: relative !important;
+}
+
+/* 2. Target the button specifically next to an input */
+/* We reset the 100% width and transparent background */
+.stack-auth-wrapper input~button,
+.stack-auth-wrapper input+button {
+  position: absolute !important;
+  right: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+
+  /* Resetting the global button styles */
+  width: auto !important;
+  height: auto !important;
+  background-color: transparent !important;
+  border: none !important;
+  padding: 4px !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  color: #9ca3af !important;
+  /* Gray color for the icon */
+  z-index: 10 !important;
+}
+
+/* Hover effect for the eye icon */
+.stack-auth-wrapper input~button:hover {
+  color: var(--bs-primary) !important;
+  /* Red on hover */
+  background-color: transparent !important;
+}
+
+/* 3. Add padding to the password input so text doesn't hit the icon */
+.stack-auth-wrapper input[type="password"],
+.stack-auth-wrapper input[type="text"] {
+  /* We add padding to right to prevent text overlap with the button */
+  left: 50%;
+  animation-delay: 4s;
+}
+
+/* =========================================
+   Stack Auth UI Overrides (UpcharSaathi Theme)
+   ========================================= */
+
+/* 1. Container Scoping */
+/* Ensure you wrap your <StackAuth> component in a div with class="stack-auth-wrapper" */
+.stack-auth-wrapper {
+  width: 100%;
+  max-width: 400px;
+  /* Prevents it from getting too wide on desktop */
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+  --stack-accent: #dc2626;
+  /* Force Red Variable */
+}
+
+/* 2. Global Button Fixes (Uniformity) */
+/* Targets all buttons inside the wrapper */
+.stack-auth-wrapper button,
+.stack-auth-wrapper a.button {
+  width: 100% !important;
+  height: 48px !important;
+  /* Taller for better touch target */
+  border-radius: 12px !important;
+  /* Softer, modern corners */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 500 !important;
+  font-size: 15px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+  margin-bottom: 12px !important;
+}
+
+/* Fix Icon Spacing inside buttons */
+.stack-auth-wrapper button svg,
+.stack-auth-wrapper button img {
+  margin-right: 10px !important;
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* 3. Primary Action Buttons (Passkey, Send Email, Sign In) */
+/* We target buttons that have a colored background or are 'submit' types */
+.stack-auth-wrapper button[type="submit"],
+.stack-auth-wrapper button[data-variant="primary"],
+.stack-auth-wrapper button[style*="background-color: rgb(37, 99, 235)"],
+/* Catches the default Blue */
+.stack-auth-wrapper button[style*="background-color: #2563eb"] {
+  background-color: var(--bs-primary) !important;
+  /* UpcharSaathi Red */
+  color: white !important;
+  border: 1px solid var(--bs-primary) !important;
+}
+
+.stack-auth-wrapper button[type="submit"]:hover {
+  background-color: #b91c1c !important;
+  /* Darker Red on hover */
+  transform: translateY(-1px);
+}
+
+/* 4. Social Login Buttons (GitHub, Google) */
+/* Give them a clean white look with border */
+.stack-auth-wrapper button[data-provider],
+/* often used by libraries for social */
+.stack-auth-wrapper button:not([type="submit"]):not([role="tab"]) {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+  border: 1px solid #e5e7eb !important;
+  transition: all 0.2s ease !important;
+}
+
+.stack-auth-wrapper button[data-provider]:hover,
+.stack-auth-wrapper button:not([type="submit"]):not([role="tab"]):hover {
+  background-color: #f3f4f6 !important;
+  border-color: #c5c8cc !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* GitHub Specifics - Make icon black */
+.stack-auth-wrapper button[data-provider="github"] {
+  color: #000000 !important;
+}
+
+.stack-auth-wrapper button[data-provider="github"] svg {
+  fill: currentColor !important;
+}
+
+/* 5. The "Email / Password" Toggle (Fixing the raw table look) */
+/* Stack Auth likely uses a div or ul with role="tablist" */
+.stack-auth-wrapper [role="tablist"] {
+  display: flex !important;
+  background-color: #f3f4f6 !important;
+  padding: 4px !important;
+  border-radius: 10px !important;
+  margin-bottom: 20px !important;
+  border: 1px solid #e5e7eb !important;
+  width: 100% !important;
+}
+
+.stack-auth-wrapper [role="tab"],
+.stack-auth-wrapper button[role="tab"] {
+  flex: 1 !important;
+  background-color: transparent !important;
+  color: #6b7280 !important;
+  border: none !important;
+  height: 36px !important;
+  margin: 0 !important;
+  font-size: 13px !important;
+  box-shadow: none !important;
+}
+
+/* The Active Tab */
+.stack-auth-wrapper [role="tab"][data-state="active"],
+.stack-auth-wrapper [role="tab"][aria-selected="true"] {
+  background-color: white !important;
+  color: var(--bs-primary) !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 6. Input Fields */
+.stack-auth-wrapper input {
+  height: 48px !important;
+  border-radius: 12px !important;
+  border: 1px solid #e5e7eb !important;
+  padding: 0 16px !important;
+  background-color: #fff !important;
+  font-size: 15px !important;
+  width: 100% !important;
+  margin-bottom: 16px !important;
+}
+
+.stack-auth-wrapper input:focus {
+  outline: none !important;
+  border-color: var(--bs-primary) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+/* Hide the "Secured by Stack Auth" badge if desired, or style it */
+/* Hide the "Secured by Stack Auth" badge */
+.stack-auth-footer,
+.stack-auth-wrapper a[href*="stack-auth"] {
+  display: none !important;
+}
+
+/* =========================================
+   Fix: Password Show/Hide Button Position
+   ========================================= */
+
+/* 1. Make the container relative so we can place the button inside */
+/* We target any div that directly contains an input */
+.stack-auth-wrapper div:has(> input) {
+  position: relative !important;
+}
+
+/* 2. Target the button specifically next to an input */
+/* We reset the 100% width and transparent background */
+.stack-auth-wrapper input~button,
+.stack-auth-wrapper input+button {
+  position: absolute !important;
+  right: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+
+  /* Resetting the global button styles */
+  width: auto !important;
+  height: auto !important;
+  background-color: transparent !important;
+  border: none !important;
+  padding: 4px !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  color: #9ca3af !important;
+  /* Gray color for the icon */
+  z-index: 10 !important;
+}
+
+/* Hover effect for the eye icon */
+.stack-auth-wrapper input~button:hover {
+  color: var(--bs-primary) !important;
+  /* Red on hover */
+  background-color: transparent !important;
+}
+
+/* 3. Add padding to the password input so text doesn't hit the icon */
+.stack-auth-wrapper input[type="password"],
+.stack-auth-wrapper input[type="text"] {
+  /* We add padding to right to prevent text overlap with the button */
+  padding-right: 45px !important;
+}
+
+/* =========================================
+   Fix: "Last Used" Login Badge/Banner - REMOVED
+   ========================================= */
+/* Force GitHub Icon Black Override */
+.stack-auth-wrapper button[data-provider='github'] svg,
+.stack-auth-wrapper button[data-provider='github'] svg path {
+  fill: #000000 !important;
+  color: #000000 !important;
 }

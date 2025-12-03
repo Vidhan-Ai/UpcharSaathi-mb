@@ -54,12 +54,18 @@ export default function FindDoctorsPage() {
         setError(null);
 
         try {
-            const permissionStatus = await Geolocation.checkPermissions();
-
-            if (permissionStatus.location !== 'granted') {
-                const requestStatus = await Geolocation.requestPermissions();
-                if (requestStatus.location !== 'granted') {
-                    throw new Error('Location permission denied. Please enable it in settings.');
+            try {
+                const permissionStatus = await Geolocation.checkPermissions();
+                if (permissionStatus.location !== 'granted') {
+                    const requestStatus = await Geolocation.requestPermissions();
+                    if (requestStatus.location !== 'granted') {
+                        throw new Error('Location permission denied. Please enable it in settings.');
+                    }
+                }
+            } catch (permErr) {
+                // Ignore 'Not implemented on web' error as browser handles permissions automatically on getCurrentPosition
+                if (permErr.message !== 'Not implemented on web.') {
+                    console.warn("Permission request failed or not needed:", permErr);
                 }
             }
 
@@ -168,6 +174,13 @@ export default function FindDoctorsPage() {
                                     >
                                         <Navigation size={18} className="me-2" /> Near Me
                                     </Button>
+                                    {center && center.lat && (
+                                        <div className="text-center mt-1">
+                                            <small className="text-muted" style={{ fontSize: '0.7rem' }}>
+                                                {center.lat.toFixed(4)}, {center.lon.toFixed(4)}
+                                            </small>
+                                        </div>
+                                    )}
                                 </Col>
                             </Row>
                         </Form>

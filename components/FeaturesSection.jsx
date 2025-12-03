@@ -22,10 +22,10 @@ export default function FeaturesSection() {
                     className="text-center mb-5"
                 >
                     <h2 className="text-dark display-5 fw-bold mb-3">
-                        Comprehensive Health Ecosystem
+                        Integrated Health Solutions
                     </h2>
                     <p className="text-muted fs-5 mx-auto" style={{ maxWidth: '700px' }}>
-                        Your all-in-one platform for managing health, from immediate symptom analysis to long-term wellness.
+                        A comprehensive medical ecosystem designed to provide immediate care, expert consultations, and continuous health monitoring.
                     </p>
                 </motion.div>
 
