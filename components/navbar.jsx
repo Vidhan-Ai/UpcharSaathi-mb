@@ -31,6 +31,7 @@ export default function NavbarComponent() {
     { href: '/find-doctors', label: 'Find Doctors' },
     { href: '/first-aid', label: 'First Aid' },
     { href: '/blood-bank', label: 'Blood Bank' },
+    { href: '/mental-health', label: 'Mental Health' },
     { href: '/about-us', label: 'About Us' },
     { href: '/contact-us', label: 'Contact Us' }
   ]
@@ -149,6 +150,15 @@ export default function NavbarComponent() {
               <Nav className="mx-auto d-none d-sm-flex">
                 {navigationLinks.map((link) => {
                   const isActive = pathname === link.href;
+                  const acronyms = {
+                    'Home': 'Home',
+                    'Find Doctors': 'FD',
+                    'First Aid': 'FA',
+                    'Blood Bank': 'BB',
+                    'Mental Health': 'MH',
+                    'About Us': 'AU',
+                    'Contact Us': 'CU'
+                  };
                   return (
                     <Link
                       key={link.href}
@@ -156,7 +166,8 @@ export default function NavbarComponent() {
                       className={`nav-link px-0 ${!isActive ? 'navbar-link-animated' : ''}`}
                       style={navLinkStyle(isActive)}
                     >
-                      {link.label}
+                      <span className="d-none d-lg-inline">{link.label}</span>
+                      <span className="d-inline d-lg-none">{acronyms[link.label] || link.label}</span>
                     </Link>
                   );
                 })}
@@ -289,7 +300,8 @@ export default function NavbarComponent() {
                         }}
                         onClick={() => setExpanded(false)}
                       >
-                        Sign In
+                        <span className="d-none d-lg-inline">Sign In</span>
+                        <span className="d-inline d-lg-none">SI</span>
                       </Button>
                     </Link>
                     <Link href="/auth/signup" className="text-decoration-none" onClick={() => setExpanded(false)}>
@@ -303,7 +315,8 @@ export default function NavbarComponent() {
                         }}
                         onClick={() => setExpanded(false)}
                       >
-                        Register
+                        <span className="d-none d-lg-inline">Register</span>
+                        <span className="d-inline d-lg-none">Reg</span>
                       </Button>
                     </Link>
                   </div>

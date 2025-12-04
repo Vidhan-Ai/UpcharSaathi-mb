@@ -9,10 +9,7 @@ export const healthFeatures = [
             'Trauma Management',
             'Emergency Hotlines'
         ],
-        iconBg: 'rgba(239, 68, 68, 0.1)',
-        iconColor: '#ef4444',
-        bulletColor: 'bg-danger',
-        buttonVariant: 'outline-danger',
+        themeColor: '#ef4444', // Red
         route: '/first-aid',
         buttonText: 'Access Protocols'
     },
@@ -25,11 +22,7 @@ export const healthFeatures = [
             'Telemedicine Integration',
             'Digital Prescriptions'
         ],
-        iconBg: 'rgba(244, 63, 94, 0.1)',
-        iconColor: '#f43f5e',
-        bulletColor: '#f43f5e',
-        buttonVariant: 'outline-light',
-        buttonStyle: { borderColor: '#f43f5e', color: '#f43f5e' },
+        themeColor: '#2563eb', // Blue
         route: '/find-doctors',
         buttonText: 'Consult Specialist'
     },
@@ -42,10 +35,7 @@ export const healthFeatures = [
             'Blood Type Availability',
             'Urgent Requests'
         ],
-        iconBg: 'rgba(220, 38, 38, 0.1)',
-        iconColor: '#dc2626',
-        bulletColor: 'bg-danger',
-        buttonVariant: 'outline-danger',
+        themeColor: '#db2777', // Pink
         route: '/blood-bank',
         buttonText: 'Find Donors'
     },
@@ -58,12 +48,35 @@ export const healthFeatures = [
             'Lifestyle Analytics',
             'Wellness Recommendations'
         ],
-        iconBg: 'rgba(252, 165, 165, 0.1)',
-        iconColor: '#fca5a5',
-        bulletColor: 'bg-danger',
-        buttonVariant: 'outline-danger',
+        themeColor: '#059669', // Emerald
         route: '#',
         buttonText: 'Track Health'
+    },
+    {
+        id: 'ai-insights',
+        icon: 'Brain',
+        title: 'AI Health Insights',
+        description: [
+            'Real-time AQI Analysis',
+            'Local Disease Outbreaks',
+            'Personalized Health News'
+        ],
+        themeColor: '#7c3aed', // Violet
+        route: '/ai-health-insights',
+        buttonText: 'View Insights'
+    },
+    {
+        id: 'health-tools',
+        icon: 'Calculator',
+        title: 'Smart Health Tools',
+        description: [
+            'BMI & BMR Calculators',
+            'Hydration Tracker',
+            'Health Metrics Analysis'
+        ],
+        themeColor: '#f97316', // Orange
+        route: '/health-tools',
+        buttonText: 'Use Tools'
     }
 ];
 
@@ -96,14 +109,13 @@ export const styles = {
     },
     cardStyle: {
         background: '#ffffff',
-        border: '1px solid #fecaca',
+        border: '1px solid #dc2626',
         borderRadius: '1rem',
         minHeight: '380px',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
-        boxShadow: '0 10px 25px -5px rgba(220, 38, 38, 0.15), 0 8px 10px -6px rgba(220, 38, 38, 0.1)',
-        transition: 'all 0.3s ease'
+        boxShadow: '0 10px 25px -5px rgba(220, 38, 38, 0.15), 0 8px 10px -6px rgba(220, 38, 38, 0.1)'
     },
     iconContainerStyle: {
         width: '56px',
