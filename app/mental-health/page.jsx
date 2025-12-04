@@ -296,9 +296,9 @@ const MoodTracker = () => {
 
 const TherapyResources = () => {
     const resources = [
-        { title: "National Helpline", number: "1-800-273-8255", icon: Phone, color: "danger" },
-        { title: "Crisis Text Line", number: "Text HOME to 741741", icon: AlertCircle, color: "warning" },
-        { title: "Find a Therapist", number: "Psychology Today", icon: BookOpen, color: "primary" }
+        { title: "KIRAN Helpline", number: "1800-599-0019", icon: Phone, color: "danger" },
+        { title: "Vandrevala Foundation", number: "1860-266-2345", icon: AlertCircle, color: "warning" },
+        { title: "iCall (TISS)", number: "9152987821", icon: BookOpen, color: "primary" }
     ]
 
     return (
@@ -329,7 +329,7 @@ const TherapyResources = () => {
                 </div>
 
                 <div className="mt-4 p-3 rounded-4 bg-primary bg-opacity-10 text-primary small">
-                    <strong>Note:</strong> If you are in immediate danger, please call your local emergency number (911) immediately.
+                    <strong>Note:</strong> If you are in immediate danger, please call your local emergency number (112) immediately.
                 </div>
             </Card.Body>
         </Card>
