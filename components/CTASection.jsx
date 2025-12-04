@@ -71,7 +71,7 @@ export default function CTASection({ isAuthenticated }) {
                                 variant="light"
                                 size="lg"
                                 className="px-5"
-                                onClick={() => router.push('/find-doctors')}
+                                onClick={() => router.push('/find-care')}
                             >
                                 Find Doctors
                             </Button>

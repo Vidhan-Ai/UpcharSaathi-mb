@@ -23,7 +23,7 @@ export const healthFeatures = [
             'Digital Prescriptions'
         ],
         themeColor: '#2563eb', // Blue
-        route: '/find-doctors',
+        route: '/find-care?tab=doctors',
         buttonText: 'Consult Specialist'
     },
     {
@@ -36,7 +36,7 @@ export const healthFeatures = [
             'Urgent Requests'
         ],
         themeColor: '#db2777', // Pink
-        route: '/blood-bank',
+        route: '/find-care?tab=blood-banks',
         buttonText: 'Find Donors'
     },
     {

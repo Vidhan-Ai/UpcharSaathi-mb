@@ -5,6 +5,37 @@ import { Search } from "lucide-react"
 
 const firstAidGuides = [
   {
+    id: "cpr",
+    title: "Instant CPR Protocols",
+    description: "Emergency lifesaving procedure for cardiac arrest",
+    steps: [
+      "Check the scene for safety and check for responsiveness.",
+      "Call 112 (or local emergency number) immediately if there is no response.",
+      "Check for breathing. If not breathing or only gasping, start CPR.",
+      "Place the heel of one hand on the center of the chest, place other hand on top.",
+      "Push hard and fast (100-120 compressions per minute) at least 2 inches deep.",
+      "Allow the chest to recoil completely between compressions.",
+      "Continue compressions until help arrives or the person starts breathing.",
+    ],
+    warning:
+      "If you are not trained in rescue breaths, perform hands-only CPR. Do not stop unless you are too exhausted to continue or help arrives.",
+  },
+  {
+    id: "trauma",
+    title: "Trauma Management",
+    description: "Immediate actions for severe injuries, bleeding, and shock",
+    steps: [
+      "Ensure your own safety first. Call 112 immediately.",
+      "Stop severe bleeding by applying direct pressure with a clean cloth.",
+      "Keep the person warm and comfortable to prevent shock.",
+      "Do not move the person unless they are in immediate danger.",
+      "If spinal injury is suspected, keep the head and neck completely still.",
+      "Monitor breathing and consciousness until help arrives.",
+    ],
+    warning:
+      "Do not remove objects impaled in the body. Do not give the person anything to eat or drink.",
+  },
+  {
     id: "cuts",
     title: "Cuts and Scrapes",
     description: "How to treat minor cuts and scrapes",
@@ -130,24 +161,38 @@ export default function FirstAidPage() {
         </div>
 
         <Row className="g-4">
-          {/* Emergency Contacts */}
+          {/* Emergency Hotlines */}
           <Col lg={12}>
             <Card style={{ background: '#ffffff', border: '1px solid #fecaca', borderRadius: '1rem', boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.1)' }} className="text-dark">
               <Card.Body>
-                <h5 className="fw-bold mb-4" style={headerGradient}>Emergency Contacts</h5>
+                <h5 className="fw-bold mb-4" style={headerGradient}>Emergency Hotlines</h5>
                 <Row className="g-3">
-                  <Col md={6}>
-                    <div style={{ background: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '0.5rem', padding: '1.5rem' }} className="text-center">
-                      <h6 className="text-danger fw-bold">Emergency Services</h6>
-                      <p className="display-6 text-dark fw-bold mt-2">112</p>
-                      <small className="text-muted">For life-threatening emergencies</small>
+                  <Col md={3} sm={6}>
+                    <div style={{ background: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '0.5rem', padding: '1.5rem' }} className="text-center h-100">
+                      <h6 className="text-danger fw-bold">National Emergency</h6>
+                      <p className="display-6 text-dark fw-bold mt-2 mb-0">112</p>
+                      <small className="text-muted">All-in-one Emergency</small>
                     </div>
                   </Col>
-                  <Col md={6}>
-                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.5rem', padding: '1.5rem' }} className="text-center">
-                      <h6 className="text-danger fw-bold">Poison Control</h6>
-                      <p className="display-6 text-dark fw-bold mt-2">1800-222-1222</p>
-                      <small className="text-muted">For poison emergencies</small>
+                  <Col md={3} sm={6}>
+                    <div style={{ background: '#eff6ff', border: '1px solid #dbeafe', borderRadius: '0.5rem', padding: '1.5rem' }} className="text-center h-100">
+                      <h6 className="text-primary fw-bold">Police</h6>
+                      <p className="display-6 text-dark fw-bold mt-2 mb-0">100</p>
+                      <small className="text-muted">Police Assistance</small>
+                    </div>
+                  </Col>
+                  <Col md={3} sm={6}>
+                    <div style={{ background: '#fff7ed', border: '1px solid #ffedd5', borderRadius: '0.5rem', padding: '1.5rem' }} className="text-center h-100">
+                      <h6 className="text-warning fw-bold" style={{ color: '#ea580c' }}>Fire</h6>
+                      <p className="display-6 text-dark fw-bold mt-2 mb-0">101</p>
+                      <small className="text-muted">Fire Brigade</small>
+                    </div>
+                  </Col>
+                  <Col md={3} sm={6}>
+                    <div style={{ background: '#f0fdf4', border: '1px solid #dcfce7', borderRadius: '0.5rem', padding: '1.5rem' }} className="text-center h-100">
+                      <h6 className="text-success fw-bold">Ambulance</h6>
+                      <p className="display-6 text-dark fw-bold mt-2 mb-0">102</p>
+                      <small className="text-muted">Medical Emergency</small>
                     </div>
                   </Col>
                 </Row>

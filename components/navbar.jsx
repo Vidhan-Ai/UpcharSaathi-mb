@@ -28,9 +28,9 @@ export default function NavbarComponent() {
   // Navigation links array for reuse
   const navigationLinks = [
     { href: '/', label: 'Home' },
-    { href: '/find-doctors', label: 'Find Doctors' },
+    { href: '/find-care', label: 'Find Care' },
     { href: '/first-aid', label: 'First Aid' },
-    { href: '/blood-bank', label: 'Blood Bank' },
+
     { href: '/mental-health', label: 'Mental Health' },
     { href: '/about-us', label: 'About Us' },
     { href: '/contact-us', label: 'Contact Us' }
@@ -152,9 +152,9 @@ export default function NavbarComponent() {
                   const isActive = pathname === link.href;
                   const acronyms = {
                     'Home': 'Home',
-                    'Find Doctors': 'FD',
+                    'Find Care': 'Care',
                     'First Aid': 'FA',
-                    'Blood Bank': 'BB',
+
                     'Mental Health': 'MH',
                     'About Us': 'AU',
                     'Contact Us': 'CU'

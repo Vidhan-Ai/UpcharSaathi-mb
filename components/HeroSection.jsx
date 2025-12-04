@@ -77,7 +77,7 @@ export default function HeroSection({ isLoaded }) {
                             <Button
                                 variant="danger"
                                 size="lg"
-                                onClick={() => router.push('/find-doctors')}
+                                onClick={() => router.push('/find-care')}
                                 className="px-5 py-3 rounded-pill shadow-lg"
                                 style={{ background: 'linear-gradient(to right, #dc2626, #fb7185)', border: 'none' }}
                             >
