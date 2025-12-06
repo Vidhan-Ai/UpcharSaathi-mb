@@ -49,7 +49,7 @@ export const healthFeatures = [
             'Wellness Recommendations'
         ],
         themeColor: '#059669', // Emerald
-        route: '#',
+        route: '/track-health',
         buttonText: 'Track Health'
     },
     {
