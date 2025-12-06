@@ -127,3 +127,27 @@ model CachedProvider {
   @@index([type])
   @@index([specialty])
 }
+
+model MentalHealthAssessment {
+  id              String   @id @default(cuid())
+  userId          String
+  assessmentId    String
+  assessmentName  String
+  score           Int
+  resultText      String
+  color           String
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+}
+
+model MoodEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  moodLabel String
+  moodColor String
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}

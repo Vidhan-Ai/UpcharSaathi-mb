@@ -31,9 +31,11 @@ import {
     ChevronRight,
     Activity,
     Clock,
-    CheckCircle
+    CheckCircle,
+    Brain // Imported Brain
 } from 'lucide-react'
 import { AccountSettings } from "@stackframe/stack";
+import { getAssessmentHistory } from '@/app/actions/mental-health'
 
 export default function ProfilePage() {
     const { user, isAuthenticated, loading, logout, getMedicalRecords, deleteMedicalRecord, addMedicalRecord, updateProfile } = useAuth()
@@ -50,6 +52,7 @@ export default function ProfilePage() {
         description: '',
         symptoms: ''
     })
+    const [assessmentHistory, setAssessmentHistory] = useState([])
 
     // Mock Data & State
     const [profileData, setProfileData] = useState({
@@ -145,6 +148,13 @@ export default function ProfilePage() {
         }
     }
 
+
+    useEffect(() => {
+        if (activeTab === 'assessments' && user) {
+            getAssessmentHistory().then(setAssessmentHistory);
+        }
+    }, [activeTab, user]);
+
     const handleDeleteRecord = (id) => {
         if (confirm('Are you sure you want to delete this record?')) {
             deleteMedicalRecord(id)
@@ -180,6 +190,7 @@ export default function ProfilePage() {
         { id: 'addresses', label: 'Addresses', icon: MapPin },
         { id: 'orders', label: 'Order History', icon: ShoppingBag },
         { id: 'medical', label: 'Medical Records', icon: FileText },
+        { id: 'assessments', label: 'Past Assessments', icon: Brain },
         { id: 'appointments', label: 'Appointments', icon: Calendar },
         { id: 'settings', label: 'Settings', icon: Settings },
     ]
@@ -539,6 +550,43 @@ export default function ProfilePage() {
                                                 </Col>
                                             ))}
                                         </Row>
+                                    </Card.Body>
+                                </Card>
+                            )}
+
+                            {activeTab === 'assessments' && (
+                                <Card className="border-0 shadow-sm content-card">
+                                    <Card.Header className="bg-white border-0 pt-4 pb-0 px-4">
+                                        <h4 className="fw-bold mb-1">Mental Health Assessments</h4>
+                                        <p className="text-muted small">Your past screening results</p>
+                                    </Card.Header>
+                                    <Card.Body className="p-4">
+                                        {assessmentHistory.length === 0 ? (
+                                            <div className="text-center py-5 text-muted">
+                                                <Brain size={48} className="mb-3 opacity-25" />
+                                                <p>No assessment history found.</p>
+                                                <Button variant="link" href="/mental-health" className="text-decoration-none">Take an Assessment</Button>
+                                            </div>
+                                        ) : (
+                                            <div className="d-grid gap-3">
+                                                {assessmentHistory.map(record => (
+                                                    <Card key={record.id} className="border-0 shadow-sm hover-card">
+                                                        <Card.Body>
+                                                            <div className="d-flex justify-content-between align-items-center mb-2">
+                                                                <h6 className="fw-bold mb-0 text-primary">{record.assessmentName}</h6>
+                                                                <small className="text-muted">{new Date(record.createdAt).toLocaleDateString()}</small>
+                                                            </div>
+                                                            <div className="d-flex align-items-center gap-2">
+                                                                <Badge bg="light" className={`bg-${record.color} bg-opacity-10 text-${record.color} border border-${record.color} border-opacity-25 px-3 py-2 fw-normal`}>
+                                                                    {record.resultText}
+                                                                </Badge>
+                                                                <span className="text-muted small">Score: {record.score}</span>
+                                                            </div>
+                                                        </Card.Body>
+                                                    </Card>
+                                                ))}
+                                            </div>
+                                        )}
                                     </Card.Body>
                                 </Card>
                             )}

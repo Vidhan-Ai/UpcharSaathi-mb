@@ -20,8 +20,12 @@ import {
     Meh,
     AlertCircle,
     Plus,
-    Minus
+    Minus,
+    Lock
 } from 'lucide-react'
+import { useUser } from '@stackframe/stack'
+import { useRouter } from 'next/navigation'
+import { saveAssessmentResult, saveMoodEntry, getMoodHistory } from '../actions/mental-health'
 
 const soothingStyles = {
     gradientText: {
@@ -87,6 +91,8 @@ const generateLsasQuestions = () => {
 }
 
 const AssessmentTool = () => {
+    const user = useUser()
+    const router = useRouter()
     const [selectedAssessment, setSelectedAssessment] = useState(null)
     const [step, setStep] = useState(0)
     const [score, setScore] = useState(0)
@@ -881,6 +887,18 @@ const AssessmentTool = () => {
         } else {
             setScore(newScore)
             setShowResult(true)
+
+            if (user) {
+                // Save result to DB
+                const resultData = selectedAssessment.getResult(newScore);
+                saveAssessmentResult({
+                    assessmentId: selectedAssessment.id,
+                    assessmentName: selectedAssessment.name,
+                    score: newScore,
+                    resultText: resultData.text,
+                    color: resultData.color
+                }).catch(err => console.error("Failed to save assessment", err));
+            }
         }
     }
 
@@ -893,6 +911,9 @@ const AssessmentTool = () => {
     }
 
     const startAssessment = (assessment) => {
+        if (!user) {
+            return; // Blocked by UI, but double check
+        }
         if (assessment.questions) {
             setSelectedAssessment(assessment)
             setStarted(true)
@@ -911,6 +932,19 @@ const AssessmentTool = () => {
                     <h4 className="fw-bold mb-0">Mental Health Assessment</h4>
                 </div>
 
+                {!user && (
+                    <div className="alert alert-warning border-0 bg-warning bg-opacity-10 d-flex align-items-center gap-3 mb-4 rounded-4" role="alert">
+                        <Lock size={20} className="text-warning" />
+                        <div className="flex-grow-1">
+                            <h6 className="fw-bold mb-1">Login Required</h6>
+                            <p className="mb-0 small text-muted">You must be logged in to take mental health assessments and save your results.</p>
+                        </div>
+                        <Button variant="warning" size="sm" className="px-3 rounded-pill fw-bold text-white shadow-sm" onClick={() => router.push('/handler/sign-in')}>
+                            Log In
+                        </Button>
+                    </div>
+                )}
+
                 {!selectedAssessment ? (
                     <div className="d-flex flex-column gap-3 p-1" style={{ maxHeight: '500px', overflowY: 'auto', overflowX: 'hidden' }}>
                         {assessments.map((assessment) => (
@@ -918,9 +952,9 @@ const AssessmentTool = () => {
                                 key={assessment.id}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
-                                className="p-3 rounded-3 border bg-white cursor-pointer hover-shadow"
-                                onClick={() => startAssessment(assessment)}
-                                style={{ cursor: 'pointer' }}
+                                className={`p-3 rounded-3 border bg-white cursor-pointer hover-shadow ${!user ? 'opacity-50' : ''}`}
+                                onClick={() => user ? startAssessment(assessment) : null}
+                                style={{ cursor: user ? 'pointer' : 'not-allowed' }}
                             >
                                 <div className="d-flex justify-content-between align-items-center">
                                     <div>
@@ -1212,8 +1246,26 @@ const MeditationPlayer = () => {
 }
 
 const MoodTracker = () => {
+    const user = useUser()
     const [selectedMood, setSelectedMood] = useState(null)
     const [history, setHistory] = useState([])
+
+    useEffect(() => {
+        if (user) {
+            getMoodHistory().then(data => {
+                const formatted = data.map(entry => ({
+                    label: entry.moodLabel,
+                    color: entry.moodColor,
+                    date: new Date(entry.createdAt).toLocaleDateString() + ' ' + new Date(entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    // map icon back if possible, or just store icon name. For now we just show label.
+                    // To show icons properly we need to map label back to icon component
+                    icon: moods.find(m => m.label === entry.moodLabel)?.icon || Smile
+                }));
+                // Combine with local history if any? simpler to just set history
+                setHistory(formatted);
+            });
+        }
+    }, [user]);
 
     const moods = [
         { icon: Sun, label: 'Great', color: '#fbbf24' },
@@ -1225,7 +1277,15 @@ const MoodTracker = () => {
 
     const handleMoodSelect = (mood) => {
         setSelectedMood(mood)
-        setHistory([{ ...mood, date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }, ...history].slice(0, 5))
+        const newEntry = { ...mood, date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+        setHistory([newEntry, ...history].slice(0, 5))
+
+        if (user) {
+            saveMoodEntry({
+                moodLabel: mood.label,
+                moodColor: mood.color
+            }).catch(e => console.error("Failed to save mood", e));
+        }
     }
 
     return (
