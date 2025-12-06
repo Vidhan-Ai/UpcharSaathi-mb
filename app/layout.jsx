@@ -12,7 +12,7 @@ import HelpButton from '@/components/HelpButton'
 import { CartProvider } from '@/contexts/CartContext'
 import VerificationBanner from '@/components/VerificationBanner'
 import { TooltipProvider } from "@radix-ui/react-tooltip";
-import { GoogleOAuthProvider } from '@react-oauth/google';
+
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -47,27 +47,25 @@ export default function RootLayout({ children }) {
         <div className="floating-icon"><svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M8 12h8" /><path d="M12 8v8" /></svg></div>
 
         <StackProvider app={stackClientApp}>
-          <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
-            <TooltipProvider>
-              <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} forcedTheme="light">
-                <Suspense fallback={<div className="d-flex justify-content-center align-items-center min-vh-100">Loading...</div>}>
-                  <AuthProvider>
-                    <CartProvider>
-                      <div className="d-flex flex-column min-vh-100 position-relative">
-                        <Navbar />
-                        <VerificationBanner />
-                        <main className="flex-grow-1 d-flex flex-column">
-                          {children}
-                        </main>
-                        <Footer />
-                      </div>
-                    </CartProvider>
-                  </AuthProvider>
-                </Suspense>
-              </ThemeProvider>
-              <HelpButton />
-            </TooltipProvider>
-          </GoogleOAuthProvider>
+          <TooltipProvider>
+            <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} forcedTheme="light">
+              <Suspense fallback={<div className="d-flex justify-content-center align-items-center min-vh-100">Loading...</div>}>
+                <AuthProvider>
+                  <CartProvider>
+                    <div className="d-flex flex-column min-vh-100 position-relative">
+                      <Navbar />
+                      <VerificationBanner />
+                      <main className="flex-grow-1 d-flex flex-column">
+                        {children}
+                      </main>
+                      <Footer />
+                    </div>
+                  </CartProvider>
+                </AuthProvider>
+              </Suspense>
+            </ThemeProvider>
+            <HelpButton />
+          </TooltipProvider>
         </StackProvider></body>
     </html>
   )

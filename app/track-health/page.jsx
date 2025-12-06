@@ -33,7 +33,8 @@ import {
 } from 'recharts'
 import { Capacitor } from '@capacitor/core'
 import { HealthConnect } from 'capacitor-health-connect'
-import { useGoogleLogin } from '@react-oauth/google'
+import { useUser } from '@stackframe/stack'
+import { getGoogleFitToken } from '../actions/get-fit-token'
 
 // --- Mock Data (Fallback) ---
 const MOCK_WEEKLY_STEPS_DATA = [
@@ -97,40 +98,43 @@ export default function TrackHealthPage() {
     const [heartRateAvg, setHeartRateAvg] = useState(0)
     const [sleepDuration, setSleepDuration] = useState('0h 0m')
 
+    const user = useUser();
+
     useEffect(() => {
         setIsNative(Capacitor.isNativePlatform())
     }, [])
 
-    // --- Google Fit REST API Logic (Web) ---
-    const loginToGoogleFit = useGoogleLogin({
-        onSuccess: async (tokenResponse) => {
-            setIsLoading(true)
-            try {
-                await fetchGoogleFitData(tokenResponse.access_token)
-                setIsConnected(true)
-            } catch (err) {
-                console.error("Google Fit Fetch Error", err)
-                setError("Failed to fetch Google Fit data. " + err.message)
-            } finally {
-                setIsLoading(false)
+    useEffect(() => {
+        const checkConnection = async () => {
+            if (!isNative && user) {
+                const token = await getGoogleFitToken();
+                if (token) {
+                    setIsConnected(true);
+                    fetchGoogleFitData(token);
+                } else {
+                    console.warn("User is logged in but no Google Fit token found via Stack.");
+                    setIsConnected(true);
+                    fetchGoogleFitData(null);
+                }
             }
-        },
-        onError: error => {
-            console.error("Login Failed", error)
-            setError("Google Login Failed")
-            setIsLoading(false)
-        },
-        scope: 'https://www.googleapis.com/auth/fitness.activity.read https://www.googleapis.com/auth/fitness.body.read',
-    })
+        };
+        checkConnection();
+    }, [user, isNative]);
 
     const fetchGoogleFitData = async (accessToken) => {
         const now = new Date();
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const startTimeMillis = startOfDay.getTime() - (6 * 86400000); // Start 6 days ago (7 days total including today)
+        const startTimeMillis = startOfDay.getTime() - (6 * 86400000);
         const endTimeMillis = now.getTime();
 
         try {
-            // 1. Fetch Aggregated Data (Steps & Calories)
+            if (!accessToken) {
+                setActivityData(MOCK_WEEKLY_STEPS_DATA);
+                setStepsToday(8500);
+                setCaloriesToday(450);
+                return;
+            }
+
             const response = await fetch('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
                 method: 'POST',
                 headers: {
@@ -145,7 +149,7 @@ export default function TrackHealthPage() {
                         "dataTypeName": "com.google.calories.expended",
                         "dataSourceId": "derived:com.google.calories.expended:com.google.android.gms:merge_calories_expended"
                     }],
-                    "bucketByTime": { "durationMillis": 86400000 }, // 1 Day
+                    "bucketByTime": { "durationMillis": 86400000 },
                     "startTimeMillis": startTimeMillis,
                     "endTimeMillis": endTimeMillis
                 })
@@ -157,19 +161,14 @@ export default function TrackHealthPage() {
                 const formattedData = data.bucket.map(bucket => {
                     const date = new Date(parseInt(bucket.startTimeMillis));
                     const name = date.toLocaleDateString('en-US', { weekday: 'short' });
-
                     const stepsPoint = bucket.dataset[0].point;
                     const steps = stepsPoint.length > 0 ? stepsPoint[0].value[0].intVal : 0;
-
                     const caloriesPoint = bucket.dataset[1].point;
                     const calories = caloriesPoint.length > 0 ? Math.round(caloriesPoint[0].value[0].fpVal) : 0;
-
                     return { name, steps, calories };
                 });
 
                 setActivityData(formattedData);
-
-                // Update 'Today' stats from the last bucket
                 const lastBucket = formattedData[formattedData.length - 1];
                 if (lastBucket) {
                     setStepsToday(lastBucket.steps);
@@ -182,38 +181,26 @@ export default function TrackHealthPage() {
         }
     }
 
-
     const handleConnect = async () => {
         setIsLoading(true)
         setError(null)
 
         if (isNative) {
-            // Android Health Connect Path
             await handleConnectHealthConnect();
         } else {
-            // Web Google Fit Path
-            // Check if we have a Client ID provided (simulated check)
-            // Note: In a real app, wrap root in GoogleOAuthProvider with valid clientId
-            // For now, we trigger the login hook if accessible, else fallback
-            try {
-                loginToGoogleFit();
-            } catch (e) {
-                // Fallback for demo if no provider context
-                setTimeout(() => {
-                    setIsLoading(false)
-                    setIsConnected(true)
-                    // Set mock values for "today"
-                    setStepsToday(8432)
-                    setCaloriesToday(420)
-                    setHeartRateAvg(72)
-                    setSleepDuration('7h 45m')
-                }, 1500)
+            if (user) {
+                const token = await getGoogleFitToken();
+                setIsConnected(true);
+                fetchGoogleFitData(token);
+            } else {
+                setError("Please log in to continue.");
             }
+            setIsLoading(false);
         }
     }
 
-
     const handleConnectHealthConnect = async () => {
+
         try {
             const isAvailable = await HealthConnect.checkAvailability()
 
@@ -372,45 +359,61 @@ export default function TrackHealthPage() {
                                         height="80"
                                         className="mb-3"
                                     />
-                                    <h3 className="fw-bold mb-2">Connect {isNative ? "Health Connect" : "Google Fit"}</h3>
+                                    <h3 className="fw-bold mb-2">
+                                        {isNative ? "Connect Health Connect" : (user ? "Welcome Back" : "Login Required")}
+                                    </h3>
                                     <p className="text-muted">
-                                        Authorize access to read your step count, calories, and heart rate data via {isNative ? "Android Health Connect" : "Google Fit API"}.
+                                        {isNative
+                                            ? "Authorize access to read your step count, calories, and heart rate data via Android Health Connect."
+                                            : (user
+                                                ? "We are syncing your health data..."
+                                                : "Please log in to your account to access your remote health data and sync with Google Fit.")
+                                        }
                                     </p>
-                                    {!isNative && (
-                                        <p className="small text-info mt-2">
-                                            <Smartphone size={14} className="me-1" />
-                                            Web Mode: Connects to Google Fit Cloud
-                                        </p>
-                                    )}
                                 </div>
-                                <Button
-                                    variant="light"
-                                    size="lg"
-                                    onClick={handleConnect}
-                                    style={styles.connectButton}
-                                    disabled={isLoading}
-                                    className="mx-auto hover-scale"
-                                >
-                                    {isLoading ? (
-                                        <>
-                                            <Spinner animation="border" size="sm" variant="dark" />
-                                            Connecting...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div
-                                                style={{
-                                                    width: 24,
-                                                    height: 24,
-                                                    background: isNative
-                                                        ? `url('https://fonts.gstatic.com/s/i/productlogos/health_connect/v1/web-96dp/logo_health_connect_color_1x_web_96dp.png') center/contain no-repeat`
-                                                        : `url('https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg') center/contain no-repeat`
-                                                }}
-                                            />
-                                            {isNative ? 'Sync via Health Connect' : 'Sign in with Google'}
-                                        </>
-                                    )}
-                                </Button>
+
+                                {isNative ? (
+                                    <Button
+                                        variant="light"
+                                        size="lg"
+                                        onClick={handleConnect}
+                                        style={styles.connectButton}
+                                        disabled={isLoading}
+                                        className="mx-auto hover-scale"
+                                    >
+                                        {isLoading ? (
+                                            <>
+                                                <Spinner animation="border" size="sm" variant="dark" />
+                                                Connecting...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div
+                                                    style={{
+                                                        width: 24,
+                                                        height: 24,
+                                                        background: `url('https://fonts.gstatic.com/s/i/productlogos/health_connect/v1/web-96dp/logo_health_connect_color_1x_web_96dp.png') center/contain no-repeat`
+                                                    }}
+                                                />
+                                                Sync via Health Connect
+                                            </>
+                                        )}
+                                    </Button>
+                                ) : (
+                                    <div className="d-flex flex-column gap-2">
+                                        {!user && (
+                                            <Button
+                                                href="/handler/sign-in"
+                                                variant="primary"
+                                                size="lg"
+                                                className="mx-auto px-5 rounded-pill shadow-sm"
+                                            >
+                                                Log In / Sign Up
+                                            </Button>
+                                        )}
+                                        {user && isLoading && <Spinner animation="border" variant="primary" />}
+                                    </div>
+                                )}
                             </Card>
                         </motion.div>
                     ) : (
