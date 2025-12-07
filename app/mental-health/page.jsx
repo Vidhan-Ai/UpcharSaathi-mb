@@ -1278,7 +1278,7 @@ const MoodTracker = () => {
     const handleMoodSelect = (mood) => {
         setSelectedMood(mood)
         const newEntry = { ...mood, date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
-        setHistory([newEntry, ...history].slice(0, 5))
+        setHistory([newEntry, ...history].slice(0, 50))
 
         if (user) {
             saveMoodEntry({
@@ -1321,7 +1321,7 @@ const MoodTracker = () => {
                 </div>
 
                 <h6 className="text-muted text-uppercase tracking-wider small mb-3">Recent Entries</h6>
-                <div className="d-flex flex-column gap-3">
+                <div className="d-flex flex-column gap-3" style={{ maxHeight: '300px', overflowY: 'auto', paddingRight: '0.5rem' }}>
                     {history.length > 0 ? history.map((entry, idx) => (
                         <div key={idx} className="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light">
                             <div className="d-flex align-items-center gap-3">

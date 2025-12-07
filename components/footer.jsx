@@ -41,13 +41,31 @@ export default function Footer() {
                   Contact Us
                 </Link>
               </li>
-              <li>
+              <li className="mb-2">
                 <Link
                   href="/about-us"
                   className="text-muted text-decoration-none hover-link"
                   style={{ transition: 'all 0.3s' }}
                 >
                   About Us
+                </Link>
+              </li>
+              <li className="mb-2">
+                <Link
+                  href="/privacy-policy"
+                  className="text-muted text-decoration-none hover-link"
+                  style={{ transition: 'all 0.3s' }}
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/terms-of-service"
+                  className="text-muted text-decoration-none hover-link"
+                  style={{ transition: 'all 0.3s' }}
+                >
+                  Terms of Service
                 </Link>
               </li>
             </ul>

@@ -14,7 +14,8 @@ import {
     Moon,
     ArrowUpRight,
     Calendar,
-    AlertTriangle
+    AlertTriangle,
+    LogOut
 } from 'lucide-react'
 import {
     AreaChart,
@@ -34,7 +35,7 @@ import {
 import { Capacitor } from '@capacitor/core'
 import { HealthConnect } from 'capacitor-health-connect'
 import { useUser } from '@stackframe/stack'
-import { getGoogleFitToken } from '../actions/get-fit-token'
+import { getFitbitData, disconnectFitbit } from '../actions/fitbit'
 
 // --- Mock Data (Fallback) ---
 const MOCK_WEEKLY_STEPS_DATA = [
@@ -107,79 +108,34 @@ export default function TrackHealthPage() {
     useEffect(() => {
         const checkConnection = async () => {
             if (!isNative && user) {
-                const token = await getGoogleFitToken();
-                if (token) {
-                    setIsConnected(true);
-                    fetchGoogleFitData(token);
-                } else {
-                    console.warn("User is logged in but no Google Fit token found via Stack.");
-                    setIsConnected(true);
-                    fetchGoogleFitData(null);
+                setIsLoading(true);
+                try {
+                    const result = await getFitbitData();
+                    if (result.isConnected) {
+                        setIsConnected(true);
+                        if (result.data) {
+                            const { activityData: data, stepsToday, caloriesToday, heartRateAvg, sleepDuration, activityDistribution } = result.data;
+                            setActivityData(data);
+                            setStepsToday(stepsToday);
+                            setCaloriesToday(caloriesToday);
+                            setHeartRateAvg(heartRateAvg);
+                            setSleepDuration(sleepDuration);
+                            setActivityDistribution(activityDistribution);
+                        } else if (result.error) {
+                            setError(result.error);
+                        }
+                    } else {
+                        // Not connected, show fallback
+                    }
+                } catch (err) {
+                    console.error("Fitbit check error", err);
+                } finally {
+                    setIsLoading(false);
                 }
             }
         };
         checkConnection();
     }, [user, isNative]);
-
-    const fetchGoogleFitData = async (accessToken) => {
-        const now = new Date();
-        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const startTimeMillis = startOfDay.getTime() - (6 * 86400000);
-        const endTimeMillis = now.getTime();
-
-        try {
-            if (!accessToken) {
-                setActivityData(MOCK_WEEKLY_STEPS_DATA);
-                setStepsToday(8500);
-                setCaloriesToday(450);
-                return;
-            }
-
-            const response = await fetch('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    "aggregateBy": [{
-                        "dataTypeName": "com.google.step_count.delta",
-                        "dataSourceId": "derived:com.google.step_count.delta:com.google.android.gms:estimated_steps"
-                    }, {
-                        "dataTypeName": "com.google.calories.expended",
-                        "dataSourceId": "derived:com.google.calories.expended:com.google.android.gms:merge_calories_expended"
-                    }],
-                    "bucketByTime": { "durationMillis": 86400000 },
-                    "startTimeMillis": startTimeMillis,
-                    "endTimeMillis": endTimeMillis
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.bucket) {
-                const formattedData = data.bucket.map(bucket => {
-                    const date = new Date(parseInt(bucket.startTimeMillis));
-                    const name = date.toLocaleDateString('en-US', { weekday: 'short' });
-                    const stepsPoint = bucket.dataset[0].point;
-                    const steps = stepsPoint.length > 0 ? stepsPoint[0].value[0].intVal : 0;
-                    const caloriesPoint = bucket.dataset[1].point;
-                    const calories = caloriesPoint.length > 0 ? Math.round(caloriesPoint[0].value[0].fpVal) : 0;
-                    return { name, steps, calories };
-                });
-
-                setActivityData(formattedData);
-                const lastBucket = formattedData[formattedData.length - 1];
-                if (lastBucket) {
-                    setStepsToday(lastBucket.steps);
-                    setCaloriesToday(lastBucket.calories);
-                }
-            }
-        } catch (err) {
-            console.error("Google Fit Fetch Error", err);
-            setError("Failed to fetch Google Fit data.");
-        }
-    }
 
     const handleConnect = async () => {
         setIsLoading(true)
@@ -188,14 +144,18 @@ export default function TrackHealthPage() {
         if (isNative) {
             await handleConnectHealthConnect();
         } else {
-            if (user) {
-                const token = await getGoogleFitToken();
-                setIsConnected(true);
-                fetchGoogleFitData(token);
-            } else {
-                setError("Please log in to continue.");
-            }
-            setIsLoading(false);
+            // Web: Redirect to Fitbit Auth
+            window.location.href = '/api/fitbit/auth';
+        }
+    }
+
+    const handleDisconnect = async () => {
+        if (!isNative) {
+            await disconnectFitbit();
+            setIsConnected(false);
+            setActivityData(MOCK_WEEKLY_STEPS_DATA); // Reset to mock
+            // Optional: Reload page to clear clean state
+            window.location.reload();
         }
     }
 
@@ -326,7 +286,7 @@ export default function TrackHealthPage() {
                     </div>
                     <h1 className="display-4 fw-bold mb-3" style={styles.gradientText}>Health & Activity Tracker</h1>
                     <p className="text-muted fs-5" style={{ maxWidth: '700px', margin: '0 auto' }}>
-                        Sync with {isNative ? 'Android Health Connect' : 'Google Fit (Web)'} to visualize your daily activity, heart rate, and sleep metrics in one beautiful dashboard.
+                        Sync with {isNative ? 'Android Health Connect' : 'Fitbit'} to visualize your daily activity, heart rate, and sleep metrics in one beautiful dashboard.
                     </p>
                 </motion.div>
 
@@ -352,22 +312,23 @@ export default function TrackHealthPage() {
                                     <img
                                         src={isNative
                                             ? "https://fonts.gstatic.com/s/i/productlogos/health_connect/v1/web-96dp/logo_health_connect_color_1x_web_96dp.png"
-                                            : "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Google_Fit_icon.svg/512px-Google_Fit_icon.svg.png"
+                                            : "https://upload.wikimedia.org/wikipedia/commons/e/e0/Fitbit_logo_2016.svg"
                                         }
-                                        alt={isNative ? "Health Connect" : "Google Fit"}
-                                        width="80"
-                                        height="80"
+                                        alt={isNative ? "Health Connect" : "Fitbit"}
+                                        width={isNative ? "80" : "150"}
+                                        height={isNative ? "80" : "auto"}
                                         className="mb-3"
+                                        style={!isNative ? { padding: '20px 0' } : {}}
                                     />
                                     <h3 className="fw-bold mb-2">
-                                        {isNative ? "Connect Health Connect" : (user ? "Welcome Back" : "Login Required")}
+                                        {isNative ? "Connect Health Connect" : (user ? "Link Your Fitbit" : "Login Required")}
                                     </h3>
                                     <p className="text-muted">
                                         {isNative
                                             ? "Authorize access to read your step count, calories, and heart rate data via Android Health Connect."
                                             : (user
-                                                ? "We are syncing your health data..."
-                                                : "Please log in to your account to access your remote health data and sync with Google Fit.")
+                                                ? "Connect your Fitbit account to sync your health data directly to this dashboard."
+                                                : "Please log in to your account to access your remote health data and sync with Fitbit.")
                                         }
                                     </p>
                                 </div>
@@ -401,7 +362,7 @@ export default function TrackHealthPage() {
                                     </Button>
                                 ) : (
                                     <div className="d-flex flex-column gap-2">
-                                        {!user && (
+                                        {!user ? (
                                             <Button
                                                 href="/handler/sign-in"
                                                 variant="primary"
@@ -410,8 +371,27 @@ export default function TrackHealthPage() {
                                             >
                                                 Log In / Sign Up
                                             </Button>
+                                        ) : (
+                                            <Button
+                                                variant="light"
+                                                size="lg"
+                                                onClick={handleConnect}
+                                                style={styles.connectButton}
+                                                disabled={isLoading}
+                                                className="mx-auto hover-scale"
+                                            >
+                                                {isLoading ? (
+                                                    <>
+                                                        <Spinner animation="border" size="sm" variant="dark" className="me-2" />
+                                                        Redirecting...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        Connect Fitbit
+                                                    </>
+                                                )}
+                                            </Button>
                                         )}
-                                        {user && isLoading && <Spinner animation="border" variant="primary" />}
                                     </div>
                                 )}
                             </Card>
@@ -423,6 +403,14 @@ export default function TrackHealthPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
                         >
+                            <div className="d-flex justify-content-end mb-3">
+                                {!isNative && (
+                                    <Button variant="outline-danger" size="sm" onClick={handleDisconnect} className="rounded-pill">
+                                        <LogOut size={16} className="me-1" /> Disconnect
+                                    </Button>
+                                )}
+                            </div>
+
                             {/* Stats Grid */}
                             <Row className="g-4 mb-5">
                                 {/* Steps Card */}
@@ -468,7 +456,7 @@ export default function TrackHealthPage() {
                                                     <Heart size={24} />
                                                 </div>
                                                 <span className="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1">
-                                                    Avg 24h
+                                                    Resting / Avg
                                                 </span>
                                             </div>
                                             <h3 className="fw-bold mb-1">{heartRateAvg} <span className="fs-6 text-muted fw-normal">bpm</span></h3>
@@ -505,7 +493,7 @@ export default function TrackHealthPage() {
                                                 <h5 className="fw-bold mb-0">Weekly Activity Trends</h5>
                                                 <Button variant="light" size="sm" className="bg-light border-0">
                                                     <Calendar size={16} className="me-2 text-muted" />
-                                                    Last 7 Days (Mock Data)
+                                                    Last 7 Days
                                                 </Button>
                                             </div>
                                             <div style={{ width: '100%', height: 350 }}>
@@ -559,27 +547,33 @@ export default function TrackHealthPage() {
                                         <Col xs={12}>
                                             <Card style={styles.glassCard} className="h-100 border-0">
                                                 <Card.Body className="p-4 d-flex flex-column">
-                                                    <h5 className="fw-bold mb-4">Activity Breakdown</h5>
+                                                    <h5 className="fw-bold mb-4">Activity Levels (Today)</h5>
                                                     <div className="flex-grow-1" style={{ minHeight: '250px' }}>
-                                                        <ResponsiveContainer width="100%" height="100%">
-                                                            <PieChart>
-                                                                <Pie
-                                                                    data={activityDistribution}
-                                                                    cx="50%"
-                                                                    cy="50%"
-                                                                    innerRadius={60}
-                                                                    outerRadius={80}
-                                                                    paddingAngle={5}
-                                                                    dataKey="value"
-                                                                >
-                                                                    {activityDistribution.map((entry, index) => (
-                                                                        <Cell key={`cell-${index}`} fill={entry.color} />
-                                                                    ))}
-                                                                </Pie>
-                                                                <Tooltip />
-                                                                <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                                                            </PieChart>
-                                                        </ResponsiveContainer>
+                                                        {activityDistribution.length > 0 ? (
+                                                            <ResponsiveContainer width="100%" height="100%">
+                                                                <PieChart>
+                                                                    <Pie
+                                                                        data={activityDistribution}
+                                                                        cx="50%"
+                                                                        cy="50%"
+                                                                        innerRadius={60}
+                                                                        outerRadius={80}
+                                                                        paddingAngle={5}
+                                                                        dataKey="value"
+                                                                    >
+                                                                        {activityDistribution.map((entry, index) => (
+                                                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                                                        ))}
+                                                                    </Pie>
+                                                                    <Tooltip />
+                                                                    <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                                                                </PieChart>
+                                                            </ResponsiveContainer>
+                                                        ) : (
+                                                            <div className="d-flex align-items-center justify-content-center h-100 text-muted">
+                                                                No activity data yet
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </Card.Body>
                                             </Card>
@@ -592,7 +586,7 @@ export default function TrackHealthPage() {
                             <div className="mt-5 text-center text-muted small">
                                 <p>
                                     <CheckCircle size={14} className="me-1" />
-                                    {isNative ? 'Data synced from Android Health Connect' : 'Data synced from Google Fit (Web)'}
+                                    {isNative ? 'Data synced from Android Health Connect' : 'Data synced from Fitbit Cloud'}
                                 </p>
                             </div>
                         </motion.div>

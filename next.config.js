@@ -25,9 +25,7 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['react-bootstrap', 'lucide-react', 'framer-motion'],
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+
 
   // Allow access from network devices
   async headers() {
