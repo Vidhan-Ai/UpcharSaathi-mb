@@ -161,3 +161,14 @@ model FitbitToken {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+model HealthScreening {
+  id                  String   @id @default(cuid())
+  userId              String
+  deficienciesDetected Json?
+  analysisData        Json?
+  images              Json?
+  createdAt           DateTime @default(now())
+
+  @@index([userId])
+}

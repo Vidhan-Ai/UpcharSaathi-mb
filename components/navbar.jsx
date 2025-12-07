@@ -32,6 +32,7 @@ export default function NavbarComponent() {
     { href: '/first-aid', label: 'First Aid' },
 
     { href: '/mental-health', label: 'Mental Health' },
+    { href: '/health-scanner', label: 'Health Scanner' },
     { href: '/about-us', label: 'About Us' },
     { href: '/contact-us', label: 'Contact Us' }
   ]

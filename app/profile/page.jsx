@@ -32,10 +32,13 @@ import {
     Activity,
     Clock,
     CheckCircle,
-    Brain // Imported Brain
+    Brain, // Imported Brain
+    AlertTriangle
 } from 'lucide-react'
 import { AccountSettings } from "@stackframe/stack";
-import { getAssessmentHistory } from '@/app/actions/mental-health'
+import { getAssessmentHistory, deleteAssessmentResult } from '@/app/actions/mental-health'
+import { getHealthScreeningHistory, deleteHealthScreening } from '@/app/actions/health-scanner'
+import Tesseract from 'tesseract.js'
 
 export default function ProfilePage() {
     const { user, isAuthenticated, loading, logout, getMedicalRecords, deleteMedicalRecord, addMedicalRecord, updateProfile } = useAuth()
@@ -53,6 +56,8 @@ export default function ProfilePage() {
         symptoms: ''
     })
     const [assessmentHistory, setAssessmentHistory] = useState([])
+    const [screeningHistory, setScreeningHistory] = useState([])
+    const [isProcessingOcr, setIsProcessingOcr] = useState(false)
 
     // Mock Data & State
     const [profileData, setProfileData] = useState({
@@ -76,41 +81,7 @@ export default function ProfilePage() {
         }
     ])
 
-    const [orders, setOrders] = useState([
-        {
-            id: 'ORD-2023-001',
-            date: '2023-10-15',
-            total: 1250,
-            status: 'Delivered',
-            items: ['Paracetamol', 'Vitamin C', 'Cough Syrup']
-        },
-        {
-            id: 'ORD-2023-002',
-            date: '2023-11-02',
-            total: 850,
-            status: 'Processing',
-            items: ['Bandages', 'Antiseptic Cream']
-        }
-    ])
 
-    const [appointments, setAppointments] = useState([
-        {
-            id: 1,
-            doctor: 'Dr. Sharma',
-            specialty: 'Cardiologist',
-            date: '2023-11-20',
-            time: '10:00 AM',
-            status: 'Upcoming'
-        },
-        {
-            id: 2,
-            doctor: 'Dr. Gupta',
-            specialty: 'Dermatologist',
-            date: '2023-10-05',
-            time: '02:30 PM',
-            status: 'Completed'
-        }
-    ])
 
     useEffect(() => {
         if (loading) return;
@@ -153,12 +124,29 @@ export default function ProfilePage() {
         if (activeTab === 'assessments' && user) {
             getAssessmentHistory().then(setAssessmentHistory);
         }
+        if (activeTab === 'screenings' && user) {
+            getHealthScreeningHistory().then(setScreeningHistory);
+        }
     }, [activeTab, user]);
 
     const handleDeleteRecord = (id) => {
         if (confirm('Are you sure you want to delete this record?')) {
             deleteMedicalRecord(id)
             setMedicalRecords(getMedicalRecords())
+        }
+    }
+
+    const handleDeleteAssessment = async (id) => {
+        if (confirm('Delete this assessment result?')) {
+            await deleteAssessmentResult(id)
+            setAssessmentHistory(prev => prev.filter(a => a.id !== id))
+        }
+    }
+
+    const handleDeleteScreening = async (id) => {
+        if (confirm('Delete this screening report?')) {
+            await deleteHealthScreening(id)
+            setScreeningHistory(prev => prev.filter(s => s.id !== id))
         }
     }
 
@@ -188,12 +176,30 @@ export default function ProfilePage() {
     const menuItems = [
         { id: 'personal', label: 'Personal Info', icon: User },
         { id: 'addresses', label: 'Addresses', icon: MapPin },
-        { id: 'orders', label: 'Order History', icon: ShoppingBag },
         { id: 'medical', label: 'Medical Records', icon: FileText },
         { id: 'assessments', label: 'Past Assessments', icon: Brain },
-        { id: 'appointments', label: 'Appointments', icon: Calendar },
+        { id: 'screenings', label: 'Health Screenings', icon: Activity },
         { id: 'settings', label: 'Settings', icon: Settings },
     ]
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setIsProcessingOcr(true);
+            Tesseract.recognize(
+                file,
+                'eng',
+                { logger: m => console.log(m) }
+            ).then(({ data: { text } }) => {
+                setNewRecordData(prev => ({ ...prev, description: prev.description ? prev.description + '\n\nExtracted Text:\n' + text : text }));
+                setIsProcessingOcr(false);
+            }).catch(err => {
+                console.error(err);
+                setIsProcessingOcr(false);
+                alert("Failed to read file.");
+            });
+        }
+    };
 
     return (
         <div className="profile-page-wrapper">
@@ -413,43 +419,7 @@ export default function ProfilePage() {
                                 </Card>
                             )}
 
-                            {activeTab === 'orders' && (
-                                <Card className="border-0 shadow-sm content-card">
-                                    <Card.Header className="bg-white border-0 pt-4 pb-0 px-4">
-                                        <h4 className="fw-bold mb-1">Order History</h4>
-                                        <p className="text-muted small">Track your past orders</p>
-                                    </Card.Header>
-                                    <Card.Body className="p-4">
-                                        {orders.map(order => (
-                                            <div key={order.id} className="order-item border rounded-3 p-3 mb-3">
-                                                <div className="d-flex justify-content-between align-items-center mb-3">
-                                                    <div>
-                                                        <span className="fw-bold text-primary me-2">{order.id}</span>
-                                                        <span className="text-muted small">• {order.date}</span>
-                                                    </div>
-                                                    <Badge bg={order.status === 'Delivered' ? 'success' : 'warning'} className="rounded-pill px-3">
-                                                        {order.status}
-                                                    </Badge>
-                                                </div>
-                                                <div className="d-flex justify-content-between align-items-end">
-                                                    <div>
-                                                        <p className="mb-1 text-muted small">Items</p>
-                                                        <p className="mb-0 fw-medium">{order.items.join(', ')}</p>
-                                                    </div>
-                                                    <div className="text-end">
-                                                        <p className="mb-1 text-muted small">Total</p>
-                                                        <h5 className="mb-0 fw-bold">₹{order.total}</h5>
-                                                    </div>
-                                                </div>
-                                                <hr className="my-3 border-light" />
-                                                <div className="text-end">
-                                                    <Button variant="link" className="text-decoration-none p-0 text-primary fw-medium">View Details <ChevronRight size={16} /></Button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </Card.Body>
-                                </Card>
-                            )}
+
 
                             {activeTab === 'medical' && (
                                 <Card className="border-0 shadow-sm content-card">
@@ -509,50 +479,7 @@ export default function ProfilePage() {
                                 </Card>
                             )}
 
-                            {activeTab === 'appointments' && (
-                                <Card className="border-0 shadow-sm content-card">
-                                    <Card.Header className="bg-white border-0 pt-4 pb-0 px-4">
-                                        <div className="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <h4 className="fw-bold mb-1">My Appointments</h4>
-                                                <p className="text-muted small">Upcoming and past visits</p>
-                                            </div>
-                                            <Button variant="primary" size="sm" className="shadow-sm">
-                                                <Plus size={16} className="me-2" /> Book New
-                                            </Button>
-                                        </div>
-                                    </Card.Header>
-                                    <Card.Body className="p-4">
-                                        <Row className="g-3">
-                                            {appointments.map(appt => (
-                                                <Col md={6} key={appt.id}>
-                                                    <div className={`appointment-ticket p-3 rounded-3 border ${appt.status === 'Upcoming' ? 'border-primary bg-primary bg-opacity-10' : 'bg-light'}`}>
-                                                        <div className="d-flex justify-content-between mb-3">
-                                                            <div className="d-flex align-items-center gap-2">
-                                                                <div className="calendar-icon bg-white rounded p-2 text-center shadow-sm" style={{ minWidth: '50px' }}>
-                                                                    <span className="d-block small text-uppercase text-danger fw-bold">{new Date(appt.date).toLocaleString('default', { month: 'short' })}</span>
-                                                                    <span className="d-block h5 mb-0 fw-bold">{appt.date.split('-')[2]}</span>
-                                                                </div>
-                                                                <div>
-                                                                    <h6 className="mb-0 fw-bold">{appt.doctor}</h6>
-                                                                    <small className="text-muted">{appt.specialty}</small>
-                                                                </div>
-                                                            </div>
-                                                            <Badge bg={appt.status === 'Upcoming' ? 'primary' : 'secondary'} className="align-self-start">{appt.status}</Badge>
-                                                        </div>
-                                                        <div className="d-flex justify-content-between align-items-center">
-                                                            <small className="text-muted"><Clock size={14} className="me-1" /> {appt.time}</small>
-                                                            {appt.status === 'Upcoming' && (
-                                                                <Button variant="link" className="text-danger p-0 small text-decoration-none">Cancel</Button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </Col>
-                                            ))}
-                                        </Row>
-                                    </Card.Body>
-                                </Card>
-                            )}
+
 
                             {activeTab === 'assessments' && (
                                 <Card className="border-0 shadow-sm content-card">
@@ -574,7 +501,12 @@ export default function ProfilePage() {
                                                         <Card.Body>
                                                             <div className="d-flex justify-content-between align-items-center mb-2">
                                                                 <h6 className="fw-bold mb-0 text-primary">{record.assessmentName}</h6>
-                                                                <small className="text-muted">{new Date(record.createdAt).toLocaleDateString()}</small>
+                                                                <div className="d-flex align-items-center">
+                                                                    <small className="text-muted me-3">{new Date(record.createdAt).toLocaleDateString()}</small>
+                                                                    <Button variant="link" className="text-danger p-0" onClick={() => handleDeleteAssessment(record.id)}>
+                                                                        <Trash2 size={16} />
+                                                                    </Button>
+                                                                </div>
                                                             </div>
                                                             <div className="d-flex align-items-center gap-2">
                                                                 <Badge bg="light" className={`bg-${record.color} bg-opacity-10 text-${record.color} border border-${record.color} border-opacity-25 px-3 py-2 fw-normal`}>
@@ -582,6 +514,59 @@ export default function ProfilePage() {
                                                                 </Badge>
                                                                 <span className="text-muted small">Score: {record.score}</span>
                                                             </div>
+                                                        </Card.Body>
+                                                    </Card>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </Card.Body>
+                                </Card>
+                            )}
+
+                            {activeTab === 'screenings' && (
+                                <Card className="border-0 shadow-sm content-card">
+                                    <Card.Header className="bg-white border-0 pt-4 pb-0 px-4">
+                                        <h4 className="fw-bold mb-1">Health Screening Reports</h4>
+                                        <p className="text-muted small">AI-based deficiency analysis results</p>
+                                    </Card.Header>
+                                    <Card.Body className="p-4">
+                                        {screeningHistory.length === 0 ? (
+                                            <div className="text-center py-5 text-muted">
+                                                <Activity size={48} className="mb-3 opacity-25" />
+                                                <p>No screening history found.</p>
+                                                <Button variant="link" href="/health-scanner" className="text-decoration-none">New Health Scan</Button>
+                                            </div>
+                                        ) : (
+                                            <div className="d-grid gap-3">
+                                                {screeningHistory.map(record => (
+                                                    <Card key={record.id} className="border-0 shadow-sm hover-card bg-light">
+                                                        <Card.Body>
+                                                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                                                <h6 className="fw-bold mb-0 text-primary">Health Scan Report</h6>
+                                                                <div className="d-flex align-items-center">
+                                                                    <small className="text-muted me-3">{new Date(record.createdAt).toLocaleDateString()}</small>
+                                                                    <Button variant="link" className="text-danger p-0" onClick={() => handleDeleteScreening(record.id)}>
+                                                                        <Trash2 size={16} />
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                            {/* Display Deficiencies if any */}
+                                                            {record.deficienciesDetected && record.deficienciesDetected.length > 0 ? (
+                                                                <div className="mb-2">
+                                                                    <div className="small fw-bold text-muted mb-1">Potential Deficiencies:</div>
+                                                                    <div className="d-flex flex-wrap gap-2">
+                                                                        {record.deficienciesDetected.map((def, i) => (
+                                                                            <Badge key={i} bg="warning" text="dark" className="fw-normal border border-warning">
+                                                                                <AlertTriangle size={12} className="me-1" /> {def}
+                                                                            </Badge>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="text-success small fw-bold">
+                                                                    <CheckCircle size={14} className="me-1" /> No significant risks detected
+                                                                </div>
+                                                            )}
                                                         </Card.Body>
                                                     </Card>
                                                 ))}
@@ -637,6 +622,16 @@ export default function ProfilePage() {
                                     onChange={(e) => setNewRecordData({ ...newRecordData, description: e.target.value })}
                                     className="modern-input"
                                 />
+                            </Form.Group>
+                            <Form.Group className="mb-3">
+                                <Form.Label className="small fw-bold text-muted">Upload Report (Image for OCR)</Form.Label>
+                                <Form.Control
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    className="modern-input"
+                                />
+                                {isProcessingOcr && <div className="text-info small mt-1">Processing text from image... <div className="spinner-border spinner-border-sm" role="status"></div></div>}
                             </Form.Group>
                         </Modal.Body>
                         <Modal.Footer className="border-0 pt-0">

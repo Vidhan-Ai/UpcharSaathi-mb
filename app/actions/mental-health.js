@@ -74,3 +74,21 @@ export async function getMoodHistory() {
         return [];
     }
 }
+
+export async function deleteAssessmentResult(id) {
+    const user = await stackServerApp.getUser();
+    if (!user) return { success: false, error: "Not authenticated" };
+
+    try {
+        await prisma.mentalHealthAssessment.deleteMany({
+            where: {
+                id: id,
+                userId: user.id
+            }
+        });
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to delete assessment:", error);
+        return { success: false, error: error.message };
+    }
+}
