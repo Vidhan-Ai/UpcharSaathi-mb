@@ -48,24 +48,46 @@ async function refreshFitbitToken(tokenRecord) {
     }
 }
 
+const fetchWithTimeout = async (resource, options = {}) => {
+    const { timeout = 8000 } = options;
+
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    const response = await fetch(resource, {
+        ...options,
+        signal: controller.signal
+    });
+    clearTimeout(id);
+    return response;
+}
+
 export async function getFitbitData() {
+    console.log("Starting getFitbitData...");
     const user = await stackServerApp.getUser();
-    if (!user) return { isConnected: false, error: 'User not logged in' };
+    if (!user) {
+        console.log("User not found via Stack");
+        return { isConnected: false, error: 'User not logged in' };
+    }
 
     let tokenRecord = await prisma.fitbitToken.findUnique({
         where: { userId: user.id }
     });
 
     if (!tokenRecord) {
+        console.log("No Fitbit token found in DB");
         return { isConnected: false };
     }
+
+    console.log("Fitbit token found, checking expiry...");
 
     // Check expiry
     let accessToken = tokenRecord.accessToken;
     // Buffer of 5 minutes
     if (new Date(new Date().getTime() + 5 * 60000) > tokenRecord.expiresAt) {
+        console.log("Token expired, refreshing...");
         accessToken = await refreshFitbitToken(tokenRecord);
         if (!accessToken) {
+            console.error("Token refresh failed");
             return { isConnected: true, error: "Session expired. Please reconnect." };
         }
     }
@@ -73,17 +95,19 @@ export async function getFitbitData() {
     try {
         const headers = { 'Authorization': `Bearer ${accessToken}` };
 
-        // Fetch 7 days data (including today) - actually 'today/6d' gives 7 days total including today
-        const stepsRes = await fetch('https://api.fitbit.com/1/user/-/activities/steps/date/today/6d.json', { headers });
+        console.log("Fetching Fitbit activity data...");
+
+        // Fetch 7 days data (including today)
+        const stepsRes = await fetchWithTimeout('https://api.fitbit.com/1/user/-/activities/steps/date/today/7d.json', { headers });
         const stepsData = await stepsRes.json();
 
-        const caloriesRes = await fetch('https://api.fitbit.com/1/user/-/activities/calories/date/today/6d.json', { headers });
+        const caloriesRes = await fetchWithTimeout('https://api.fitbit.com/1/user/-/activities/calories/date/today/7d.json', { headers });
         const caloriesData = await caloriesRes.json();
 
-        const hrRes = await fetch('https://api.fitbit.com/1/user/-/activities/heart/date/today/1d.json', { headers });
+        const hrRes = await fetchWithTimeout('https://api.fitbit.com/1/user/-/activities/heart/date/today/1d.json', { headers });
         const hrData = await hrRes.json();
 
-        const sleepRes = await fetch('https://api.fitbit.com/1.2/user/-/sleep/date/today.json', { headers });
+        const sleepRes = await fetchWithTimeout('https://api.fitbit.com/1.2/user/-/sleep/date/today.json', { headers });
         const sleepData = await sleepRes.json();
 
 
@@ -91,11 +115,15 @@ export async function getFitbitData() {
         let stepsToday = 0;
         let caloriesToday = 0;
 
+        if (stepsData.errors || caloriesData.errors) {
+            console.error("Fitbit Data Errors:", stepsData.errors || caloriesData.errors);
+            throw new Error("API returned errors");
+        }
+
         if (stepsData['activities-steps'] && caloriesData['activities-calories']) {
             activityData = stepsData['activities-steps'].map((stepDay) => {
                 const calDay = caloriesData['activities-calories'].find(c => c.dateTime === stepDay.dateTime);
                 // Date string is YYYY-MM-DD
-                // Use a safe way to parse date to avoid timezone issues, or just append T00:00:00
                 const date = new Date(stepDay.dateTime + 'T00:00:00');
                 const name = date.toLocaleDateString('en-US', { weekday: 'short' });
                 const steps = parseInt(stepDay.value);
@@ -103,11 +131,10 @@ export async function getFitbitData() {
                 return { name, steps, calories };
             });
 
-            const lastDay = activityData[activityData.length - 1];
-            if (lastDay) {
-                stepsToday = lastDay.steps;
-                caloriesToday = lastDay.calories;
-            }
+            // Rest of processing...
+        } else {
+            // Handle missing data gracefully
+            console.warn("Fitbit data missing expected fields", stepsData, caloriesData);
         }
 
         let heartRateAvg = 0;
@@ -126,7 +153,7 @@ export async function getFitbitData() {
             sleepDuration = `${h}h ${m}m`;
         }
 
-        const summaryRes = await fetch('https://api.fitbit.com/1/user/-/activities/date/today.json', { headers });
+        const summaryRes = await fetchWithTimeout('https://api.fitbit.com/1/user/-/activities/date/today.json', { headers });
         const summaryData = await summaryRes.json();
 
         let activityDistribution = [];
@@ -138,6 +165,8 @@ export async function getFitbitData() {
                 { name: 'Very Active', value: summaryData.summary.veryActiveMinutes, color: '#10b981' },
             ].filter(x => x.value > 0);
         }
+
+        console.log("Fitbit data fetched successfully");
 
         return {
             isConnected: true,

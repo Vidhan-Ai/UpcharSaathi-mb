@@ -21,11 +21,15 @@ import {
     AlertCircle,
     Plus,
     Minus,
-    Lock
+    Lock,
+    BarChart2,
+    List as ListIcon,
+    Activity
 } from 'lucide-react'
 import { useUser } from '@stackframe/stack'
 import { useRouter } from 'next/navigation'
 import { saveAssessmentResult, saveMoodEntry, getMoodHistory } from '../actions/mental-health'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, AreaChart, Area } from 'recharts'
 
 const soothingStyles = {
     gradientText: {
@@ -1050,10 +1054,10 @@ const MeditationPlayer = () => {
     const audioRef = useRef(null)
 
     const sessionTracks = {
-        'Breathing': 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3', // Gentle piano/ambient
-        'Anxiety Release': 'https://cdn.pixabay.com/audio/2022/10/05/audio_6861212592.mp3', // Calming nature/water sounds
-        'Sleep': 'https://cdn.pixabay.com/audio/2021/09/06/audio_3e9797d56e.mp3', // Deep sleep frequencies
-        'Focus': 'https://cdn.pixabay.com/audio/2022/01/18/audio_d0a13f69d0.mp3' // Binaural beats/focus music
+        'Breathing': '/assets/music/breathing.mp3',
+        'Anxiety Release': '/assets/music/anxiety.mp3',
+        'Sleep': '/assets/music/sleep.mp3',
+        'Focus': '/assets/music/focus.mp3'
     }
 
     const sessionImages = {
@@ -1102,8 +1106,9 @@ const MeditationPlayer = () => {
     }, [isPlaying, timeLeft])
 
     useEffect(() => {
+        // When session changes, reset timer and handle audio
         if (audioRef.current) {
-            audioRef.current.src = sessionTracks[activeSession]
+            // Note: src is updated via prop, we just need to ensure it loads/plays
             audioRef.current.load()
             if (isPlaying) {
                 audioRef.current.play().catch(error => console.log("Audio play failed:", error))
@@ -1240,6 +1245,7 @@ const MeditationPlayer = () => {
                         </Button>
                     ))}
                 </div>
+                <audio key={activeSession} ref={audioRef} src={sessionTracks[activeSession]} loop />
             </Card.Body>
         </Card>
     )
@@ -1249,6 +1255,18 @@ const MoodTracker = () => {
     const user = useUser()
     const [selectedMood, setSelectedMood] = useState(null)
     const [history, setHistory] = useState([])
+    const [viewMode, setViewMode] = useState('graph') // 'graph' or 'list'
+
+    const getMoodScore = (label) => {
+        switch (label) {
+            case 'Great': return 5;
+            case 'Good': return 4;
+            case 'Okay': return 3;
+            case 'Bad': return 2;
+            case 'Awful': return 1;
+            default: return 3;
+        }
+    }
 
     useEffect(() => {
         if (user) {
@@ -1257,8 +1275,8 @@ const MoodTracker = () => {
                     label: entry.moodLabel,
                     color: entry.moodColor,
                     date: new Date(entry.createdAt).toLocaleDateString() + ' ' + new Date(entry.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                    // map icon back if possible, or just store icon name. For now we just show label.
-                    // To show icons properly we need to map label back to icon component
+                    timestamp: new Date(entry.createdAt).getTime(),
+                    score: getMoodScore(entry.moodLabel),
                     icon: moods.find(m => m.label === entry.moodLabel)?.icon || Smile
                 }));
                 // Combine with local history if any? simpler to just set history
@@ -1277,7 +1295,13 @@ const MoodTracker = () => {
 
     const handleMoodSelect = (mood) => {
         setSelectedMood(mood)
-        const newEntry = { ...mood, date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+        const now = new Date();
+        const newEntry = {
+            ...mood,
+            date: now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            timestamp: now.getTime(),
+            score: getMoodScore(mood.label)
+        };
         setHistory([newEntry, ...history].slice(0, 50))
 
         if (user) {
@@ -1288,14 +1312,33 @@ const MoodTracker = () => {
         }
     }
 
+    // Sort history for chart (oldest first)
+    const chartData = [...history].reverse();
+
     return (
         <Card style={soothingStyles.glassCard} className="p-4 h-100">
             <Card.Body>
-                <div className="d-flex align-items-center gap-3 mb-4">
-                    <div className="p-3 rounded-circle bg-warning bg-opacity-10 text-warning">
-                        <Heart size={24} />
+                <div className="d-flex align-items-center justify-content-between mb-4">
+                    <div className="d-flex align-items-center gap-3">
+                        <div className="p-3 rounded-circle bg-warning bg-opacity-10 text-warning">
+                            <Heart size={24} />
+                        </div>
+                        <h4 className="fw-bold mb-0">Mood Tracker</h4>
                     </div>
-                    <h4 className="fw-bold mb-0">Mood Tracker</h4>
+                    <div className="d-flex bg-light rounded-pill p-1 border">
+                        <button
+                            className={`btn btn-sm rounded-pill px-3 fw-bold ${viewMode === 'graph' ? 'bg-white shadow-sm text-dark' : 'text-muted'}`}
+                            onClick={() => setViewMode('graph')}
+                        >
+                            <BarChart2 size={16} className="me-2" /> Graph
+                        </button>
+                        <button
+                            className={`btn btn-sm rounded-pill px-3 fw-bold ${viewMode === 'list' ? 'bg-white shadow-sm text-dark' : 'text-muted'}`}
+                            onClick={() => setViewMode('list')}
+                        >
+                            <ListIcon size={16} className="me-2" /> List
+                        </button>
+                    </div>
                 </div>
 
                 <div className="d-flex justify-content-between mb-5">
@@ -1320,20 +1363,74 @@ const MoodTracker = () => {
                     ))}
                 </div>
 
-                <h6 className="text-muted text-uppercase tracking-wider small mb-3">Recent Entries</h6>
-                <div className="d-flex flex-column gap-3" style={{ maxHeight: '300px', overflowY: 'auto', paddingRight: '0.5rem' }}>
-                    {history.length > 0 ? history.map((entry, idx) => (
-                        <div key={idx} className="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light">
-                            <div className="d-flex align-items-center gap-3">
-                                <entry.icon size={20} style={{ color: entry.color }} />
-                                <span className="fw-medium">{entry.label}</span>
+                <h6 className="text-muted text-uppercase tracking-wider small mb-3">
+                    {viewMode === 'graph' ? 'Mood Trends' : 'Recent Entries'}
+                </h6>
+
+                {viewMode === 'graph' ? (
+                    <div style={{ height: '300px', width: '100%' }}>
+                        {history.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                    <XAxis
+                                        dataKey="date"
+                                        hide={true}
+                                    />
+                                    <YAxis
+                                        domain={[1, 5]}
+                                        ticks={[1, 2, 3, 4, 5]}
+                                        tickFormatter={(value) => {
+                                            if (value === 5) return 'Great';
+                                            if (value === 3) return 'Okay';
+                                            if (value === 1) return 'Awful';
+                                            return '';
+                                        }}
+                                        tick={{ fontSize: 12, fill: '#64748b' }}
+                                        axisLine={false}
+                                        tickLine={false}
+                                    />
+                                    <RechartsTooltip
+                                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                    />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="score"
+                                        stroke="#8b5cf6"
+                                        strokeWidth={3}
+                                        fillOpacity={1}
+                                        fill="url(#colorScore)"
+                                        animationDuration={1000}
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="d-flex align-items-center justify-content-center h-100 text-muted small bg-light rounded-3">
+                                No mood data available for chart.
                             </div>
-                            <span className="text-muted small">{entry.date}</span>
-                        </div>
-                    )) : (
-                        <div className="text-center text-muted py-4 small">No mood entries yet today.</div>
-                    )}
-                </div>
+                        )}
+                    </div>
+                ) : (
+                    <div className="d-flex flex-column gap-3" style={{ maxHeight: '300px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+                        {history.length > 0 ? history.map((entry, idx) => (
+                            <div key={idx} className="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light">
+                                <div className="d-flex align-items-center gap-3">
+                                    <entry.icon size={20} style={{ color: entry.color }} />
+                                    <span className="fw-medium">{entry.label}</span>
+                                </div>
+                                <span className="text-muted small">{entry.date}</span>
+                            </div>
+                        )) : (
+                            <div className="text-center text-muted py-4 small">No mood entries yet today.</div>
+                        )}
+                    </div>
+                )}
             </Card.Body>
         </Card>
     )

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { Buffer } from 'buffer';
 import { stackServerApp } from "@/stack/server";
 import { prisma } from "@/lib/db";
 

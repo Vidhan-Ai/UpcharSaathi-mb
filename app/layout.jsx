@@ -26,7 +26,10 @@ export const viewport = {
 export const metadata = {
   title: "UpcharSaathi",
   description: "AI-powered symptom checker and doctor recommendation system",
-  generator: 'v0.dev'
+  generator: 'v0.dev',
+  icons: {
+    icon: '/assets/logos/favicon.png',
+  },
 }
 
 export default function RootLayout({ children }) {

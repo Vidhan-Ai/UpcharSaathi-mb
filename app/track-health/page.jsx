@@ -273,7 +273,7 @@ export default function TrackHealthPage() {
 
 
     return (
-        <div className="min-vh-100 bg-light py-5" style={{ background: 'linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%)' }}>
+        <div className="min-vh-100 py-5">
             <Container>
                 {/* Header */}
                 <motion.div
@@ -312,13 +312,13 @@ export default function TrackHealthPage() {
                                     <img
                                         src={isNative
                                             ? "https://fonts.gstatic.com/s/i/productlogos/health_connect/v1/web-96dp/logo_health_connect_color_1x_web_96dp.png"
-                                            : "https://upload.wikimedia.org/wikipedia/commons/e/e0/Fitbit_logo_2016.svg"
+                                            : "/assets/logos/fitbit.svg"
                                         }
                                         alt={isNative ? "Health Connect" : "Fitbit"}
                                         width={isNative ? "80" : "150"}
                                         height={isNative ? "80" : "auto"}
                                         className="mb-3"
-                                        style={!isNative ? { padding: '20px 0' } : {}}
+                                        style={!isNative ? { padding: '10px 0' } : {}}
                                     />
                                     <h3 className="fw-bold mb-2">
                                         {isNative ? "Connect Health Connect" : (user ? "Link Your Fitbit" : "Login Required")}
@@ -383,7 +383,7 @@ export default function TrackHealthPage() {
                                                 {isLoading ? (
                                                     <>
                                                         <Spinner animation="border" size="sm" variant="dark" className="me-2" />
-                                                        Redirecting...
+                                                        {typeof window !== 'undefined' && (window.location.search.includes('connected') || window.location.search.includes('error')) ? 'Syncing...' : 'Redirecting...'}
                                                     </>
                                                 ) : (
                                                     <>
