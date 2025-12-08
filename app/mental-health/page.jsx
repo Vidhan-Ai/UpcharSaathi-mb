@@ -24,7 +24,8 @@ import {
     Lock,
     BarChart2,
     List as ListIcon,
-    Activity
+    Activity,
+    ChevronLeft
 } from 'lucide-react'
 import { useUser } from '@stackframe/stack'
 import { useRouter } from 'next/navigation'
@@ -99,9 +100,9 @@ const AssessmentTool = () => {
     const router = useRouter()
     const [selectedAssessment, setSelectedAssessment] = useState(null)
     const [step, setStep] = useState(0)
-    const [score, setScore] = useState(0)
+    const [answers, setAnswers] = useState({})
+    const [history, setHistory] = useState([])
     const [showResult, setShowResult] = useState(false)
-    const [started, setStarted] = useState(false)
 
     const assessments = [
         {
@@ -828,77 +829,68 @@ const AssessmentTool = () => {
         }
     ]
 
+    const getPointValue = (assessment, stepIndex, rawValue) => {
+        if (assessment.id === 'mdq') {
+            if (stepIndex < 13) return rawValue;
+            if (stepIndex === 13) return rawValue * 100;
+            if (stepIndex === 14) return (rawValue >= 2) ? 1000 : 0;
+            return 0;
+        }
+        if (assessment.id === 'audit') {
+            return assessment.questions[stepIndex].values ? assessment.questions[stepIndex].values[rawValue] : rawValue;
+        }
+        if (assessment.id === 'dast10') {
+            if (stepIndex === 2) return (rawValue === 0) ? 1 : 0;
+            return rawValue;
+        }
+        return rawValue;
+    }
+
+    const getNextStep = (assessment, currentStep, rawValue) => {
+        if (assessment.id === 'audit') {
+            if (currentStep === 0 && rawValue === 0) return 8;
+        }
+        if (assessment.id === 'cssrs') {
+            if (currentStep === 1 && rawValue === 0) return 5;
+        }
+        return currentStep + 1;
+    }
+
+    const calculateTotalScore = (assessment, answersMap) => {
+        let total = 0;
+        let current = 0;
+        // Walk the path to account for skips correctly
+        while (current < assessment.questions.length) {
+            if (answersMap[current] === undefined) break; // Should not happen for completed test
+            const val = answersMap[current];
+            total += getPointValue(assessment, current, val);
+            current = getNextStep(assessment, current, val);
+        }
+        return total;
+    }
+
     const handleAnswer = (value) => {
-        let addedValue = value;
-        let nextStep = step + 1;
+        setAnswers(prev => ({ ...prev, [step]: value }));
 
-        // Special handling for MDQ encoding
-        if (selectedAssessment?.id === 'mdq') {
-            if (step < 13) { // Q1-13
-                addedValue = value; // 0 or 1
-            } else if (step === 13) { // Q14
-                addedValue = value * 100; // 0 or 100
-            } else if (step === 14) { // Q15
-                // Options: 0=No, 1=Minor, 2=Mod, 3=Serious
-                // We need Mod(2) or Serious(3) to be 1000.
-                addedValue = (value >= 2) ? 1000 : 0;
-            } else {
-                // Q16 and Q17 (Family history, Prior diagnosis) do not affect the score for the screener result
-                addedValue = 0;
-            }
-        }
+        const next = getNextStep(selectedAssessment, step, value);
 
-        // Special handling for AUDIT
-        if (selectedAssessment?.id === 'audit') {
-            // Use specific values if defined (for Q9, Q10)
-            if (selectedAssessment.questions[step].values) {
-                addedValue = selectedAssessment.questions[step].values[value];
-            }
-
-            // Skip logic
-            // Q1: If "Never" (value 0), skip to Q9 (index 8)
-            if (step === 0 && value === 0) {
-                nextStep = 8; // Jump to Q9
-            }
-
-            // Since we don't store history, we'll just implement the Q1 skip for now which is the most critical.
-        }
-
-        // Special handling for DAST-10
-        if (selectedAssessment?.id === 'dast10') {
-
-            if (step === 2) { // Question 3
-                // If "No" (0) -> +1 point. If "Yes" (1) -> +0 points.
-                addedValue = (value === 0) ? 1 : 0;
-            } else {
-                // For all others, "Yes" (1) -> +1 point. "No" (0) -> +0 points.
-                addedValue = value;
-            }
-        }
-
-        // Special handling for C-SSRS branching
-        if (selectedAssessment?.id === 'cssrs') {
-
-            if (step === 1 && value === 0) { // Q2 is No
-                nextStep = 5; // Skip Q3(2), Q4(3), Q5(4) -> Go to Q6 (index 5)
-            }
-        }
-
-        const newScore = score + addedValue
-        if (nextStep < selectedAssessment.questions.length) {
-            setScore(newScore)
-            setStep(nextStep)
+        if (next < selectedAssessment.questions.length) {
+            setHistory(prev => [...prev, step]);
+            setStep(next);
         } else {
-            setScore(newScore)
-            setShowResult(true)
+            // Finished
+            setShowResult(true);
+
+            // Calculate final score for saving
+            const finalMap = { ...answers, [step]: value };
+            const finalScore = calculateTotalScore(selectedAssessment, finalMap);
 
             if (user) {
-                // Save result to DB
-                const resultData = selectedAssessment.getResult(newScore);
+                const resultData = selectedAssessment.getResult(finalScore);
                 saveAssessmentResult({
                     assessmentId: selectedAssessment.id,
                     assessmentName: selectedAssessment.name,
-                    score: newScore,
+                    score: finalScore,
                     resultText: resultData.text,
                     color: resultData.color
                 }).catch(err => console.error("Failed to save assessment", err));
@@ -906,21 +898,29 @@ const AssessmentTool = () => {
         }
     }
 
+    const handlePrevious = () => {
+        if (history.length === 0) return;
+        const prevStep = history[history.length - 1];
+        setHistory(prev => prev.slice(0, -1));
+        setStep(prevStep);
+    }
+
     const resetAssessment = () => {
         setStep(0)
-        setScore(0)
+        setAnswers({})
+        setHistory([])
         setShowResult(false)
-        setStarted(false)
         setSelectedAssessment(null)
     }
 
     const startAssessment = (assessment) => {
-        if (!user) {
-            return; // Blocked by UI, but double check
-        }
+        if (!user) return;
         if (assessment.questions) {
             setSelectedAssessment(assessment)
-            setStarted(true)
+            setStep(0)
+            setAnswers({})
+            setHistory([])
+            setShowResult(false)
         } else {
             alert("This assessment is currently available only through professional consultation.")
         }
@@ -983,9 +983,12 @@ const AssessmentTool = () => {
                         exit={{ opacity: 0, x: -20 }}
                     >
                         <div className="mb-4">
-                            <Button variant="link" className="p-0 mb-3 text-muted text-decoration-none" onClick={() => setSelectedAssessment(null)}>
-                                &larr; Back to Assessments
-                            </Button>
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <Button variant="link" className="p-0 text-muted text-decoration-none" onClick={() => setSelectedAssessment(null)}>
+                                    &larr; Exit Assessment
+                                </Button>
+                            </div>
+
                             <h5 className="fw-bold mb-2 text-primary">{selectedAssessment.fullName}</h5>
                             <div className="d-flex justify-content-between text-muted small mb-2">
                                 <span>Question {step + 1} of {selectedAssessment.questions.length}</span>
@@ -1001,23 +1004,34 @@ const AssessmentTool = () => {
                         <div className="d-grid gap-3">
                             {typeof selectedAssessment.questions[step] === 'string' ? (
                                 <>
-                                    <Button variant="outline-light" className="text-dark border text-start p-3 hover-bg-light" onClick={() => handleAnswer(0)}>Not at all</Button>
-                                    <Button variant="outline-light" className="text-dark border text-start p-3 hover-bg-light" onClick={() => handleAnswer(1)}>Several days</Button>
-                                    <Button variant="outline-light" className="text-dark border text-start p-3 hover-bg-light" onClick={() => handleAnswer(2)}>More than half the days</Button>
-                                    <Button variant="outline-light" className="text-dark border text-start p-3 hover-bg-light" onClick={() => handleAnswer(3)}>Nearly every day</Button>
+                                    <Button variant={answers[step] === 0 ? "primary" : "outline-light"} className={`text-start p-3 ${answers[step] === 0 ? 'text-white' : 'text-dark border hover-bg-light'}`} onClick={() => handleAnswer(0)}>Not at all</Button>
+                                    <Button variant={answers[step] === 1 ? "primary" : "outline-light"} className={`text-start p-3 ${answers[step] === 1 ? 'text-white' : 'text-dark border hover-bg-light'}`} onClick={() => handleAnswer(1)}>Several days</Button>
+                                    <Button variant={answers[step] === 2 ? "primary" : "outline-light"} className={`text-start p-3 ${answers[step] === 2 ? 'text-white' : 'text-dark border hover-bg-light'}`} onClick={() => handleAnswer(2)}>More than half the days</Button>
+                                    <Button variant={answers[step] === 3 ? "primary" : "outline-light"} className={`text-start p-3 ${answers[step] === 3 ? 'text-white' : 'text-dark border hover-bg-light'}`} onClick={() => handleAnswer(3)}>Nearly every day</Button>
                                 </>
                             ) : (
                                 selectedAssessment.questions[step].options.map((option, idx) => (
                                     <Button
                                         key={idx}
-                                        variant="outline-light"
-                                        className="text-dark border text-start p-3 hover-bg-light"
+                                        variant={answers[step] === idx ? "primary" : "outline-light"}
+                                        className={`text-start p-3 ${answers[step] === idx ? 'text-white' : 'text-dark border hover-bg-light'}`}
                                         onClick={() => handleAnswer(idx)}
                                     >
                                         {option}
                                     </Button>
                                 ))
                             )}
+                        </div>
+                        <div className="mt-4 d-flex justify-content-start">
+                            <Button
+                                variant="outline-secondary"
+                                size="sm"
+                                onClick={handlePrevious}
+                                disabled={history.length === 0}
+                                className="d-flex align-items-center gap-2 px-3 rounded-pill"
+                            >
+                                <ChevronLeft size={16} /> Previous
+                            </Button>
                         </div>
                     </motion.div>
                 ) : (
@@ -1027,19 +1041,30 @@ const AssessmentTool = () => {
                         animate={{ opacity: 1, scale: 1 }}
                         className="text-center py-4"
                     >
-                        <div className={`d-inline-flex p-4 rounded-circle bg-${selectedAssessment.getResult(score).color} bg-opacity-10 text-${selectedAssessment.getResult(score).color} mb-4`}>
-                            <CheckCircle2 size={48} />
-                        </div>
-                        <h3 className="fw-bold mb-2">{selectedAssessment.getResult(score).text}</h3>
-                        <p className="text-muted mb-4">{selectedAssessment.getResult(score).advice}</p>
-                        <div className="d-flex justify-content-center gap-3">
-                            <Button variant="outline-secondary" className="rounded-pill px-4" onClick={() => {
-                                setStep(0)
-                                setScore(0)
-                                setShowResult(false)
-                            }}>Retake</Button>
-                            <Button variant="primary" className="rounded-pill px-4" onClick={resetAssessment}>All Assessments</Button>
-                        </div>
+                        {(() => {
+                            // Compute score purely for display
+                            const finalScore = calculateTotalScore(selectedAssessment, answers);
+                            const result = selectedAssessment.getResult(finalScore);
+
+                            return (
+                                <>
+                                    <div className={`d-inline-flex p-4 rounded-circle bg-${result.color} bg-opacity-10 text-${result.color} mb-4`}>
+                                        <CheckCircle2 size={48} />
+                                    </div>
+                                    <h3 className="fw-bold mb-2">{result.text}</h3>
+                                    <p className="text-muted mb-4">{result.advice}</p>
+                                    <div className="d-flex justify-content-center gap-3">
+                                        <Button variant="outline-secondary" className="rounded-pill px-4" onClick={() => {
+                                            setStep(0)
+                                            setAnswers({})
+                                            setHistory([])
+                                            setShowResult(false)
+                                        }}>Retake</Button>
+                                        <Button variant="primary" className="rounded-pill px-4" onClick={resetAssessment}>All Assessments</Button>
+                                    </div>
+                                </>
+                            )
+                        })()}
                     </motion.div>
                 )}
             </Card.Body>
