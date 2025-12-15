@@ -5,19 +5,30 @@ import { stackServerApp } from "@/stack/server";
 
 export async function POST(request) {
     // Authenticate Web User
+    // Authenticate Web User
     const user = await stackServerApp.getUser();
-    if (!user) {
+    if (!user || !user.primaryEmail) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     try {
-        console.log(`Requesting sync for user: ${user.id}`);
-        // Set syncPending to true
+        // Resolve to Prisma User (matching Android Google Auth identity)
+        const dbUser = await prisma.users.findUnique({
+            where: { email: user.primaryEmail }
+        });
+
+        if (!dbUser) {
+            return NextResponse.json({ error: "User record not found" }, { status: 404 });
+        }
+
+        console.log(`Requesting sync for user: ${dbUser.email} (${dbUser.id})`);
+
+        // Set syncPending to true using Prisma User ID
         await prisma.healthSync.upsert({
-            where: { userId: user.id },
+            where: { userId: dbUser.id },
             update: { syncPending: true },
             create: {
-                userId: user.id,
+                userId: dbUser.id,
                 syncPending: true,
                 data: [] // init empty if new
             }

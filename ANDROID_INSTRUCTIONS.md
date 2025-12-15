@@ -66,7 +66,7 @@ import java.time.temporal.ChronoUnit
 
 // --- 1. Network Interface ---
 interface BackendApi {
-    @GET("/api/health/check-sync-status")
+    @GET("/api/health/check-sync")
     suspend fun checkSyncStatus(): Map<String, Boolean> // No param needed, uses Token
 
     @POST("/api/health/upload")

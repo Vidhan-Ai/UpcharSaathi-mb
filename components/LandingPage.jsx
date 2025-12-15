@@ -186,31 +186,30 @@ export default function LandingPage() {
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ delay: index * 0.1 }}
-                                    whileHover={{ y: -5 }}
                                 >
-                                    <Link href={feature.href} className="text-decoration-none">
-                                        <div className="h-100 rounded-4 p-4 position-relative overflow-hidden feature-tool-card" style={{
-                                            background: 'rgba(30, 41, 59, 0.4)',
-                                            backdropFilter: 'blur(10px)',
-                                            border: '1px solid rgba(255, 255, 255, 0.05)'
-                                        }}>
-                                            <div className="d-flex justify-content-between align-items-start mb-3">
-                                                <div className="d-inline-flex align-items-center justify-content-center p-3 rounded-3" style={{ background: `${feature.color}20` }}>
-                                                    <feature.icon size={28} style={{ color: feature.color }} />
-                                                </div>
-                                                {feature.tag && (
-                                                    <span className="badge bg-white bg-opacity-10 text-white small px-2 py-1 rounded-pill">
-                                                        {feature.tag}
-                                                    </span>
-                                                )}
+                                    <Link href={feature.href} className="text-decoration-none d-block h-100">
+                                        <div className="p-5 rounded-5 h-100 feature-card-advanced position-relative overflow-hidden group">
+                                            <div className="position-absolute top-0 end-0 p-4 opacity-10">
+                                                <feature.icon size={100} strokeWidth={1} style={{ color: feature.color }} />
                                             </div>
 
-                                            <h5 className="fw-bold text-white mb-2">{feature.title}</h5>
-                                            <p className="text-white-50 small mb-4" style={{ lineHeight: '1.6' }}>{feature.desc}</p>
+                                            {feature.tag && (
+                                                <div className="position-absolute top-0 end-0 m-4">
+                                                    <span className="badge bg-white bg-opacity-10 text-white small px-3 py-2 rounded-pill shadow-sm border border-white border-opacity-10">
+                                                        {feature.tag}
+                                                    </span>
+                                                </div>
+                                            )}
 
-                                            <div className="d-flex align-items-center text-white fw-medium small mt-auto p-2 rounded-3" style={{ background: 'rgba(255, 255, 255, 0.05)', width: 'fit-content' }}>
-                                                <span className="me-2">Launch Tool</span>
-                                                <ArrowRight size={14} className="text-white-50" />
+                                            <div className="mb-5 d-inline-flex p-3 rounded-2xl glass-icon" style={{ border: `1px solid ${feature.color}40`, background: `${feature.color}10` }}>
+                                                <feature.icon size={32} style={{ color: feature.color }} />
+                                            </div>
+
+                                            <h3 className="h3 fw-bold text-white mb-3">{feature.title}</h3>
+                                            <p className="text-white-50 mb-4" style={{ lineHeight: '1.7' }}>{feature.desc}</p>
+
+                                            <div className="d-flex align-items-center text-white small fw-bold tracking-wide text-uppercase feature-link">
+                                                Launch Tool <ArrowRight size={14} className="ms-2" />
                                             </div>
                                         </div>
                                     </Link>
@@ -290,7 +289,7 @@ export default function LandingPage() {
                 </Container>
 
                 {/* Coming Soon Section */}
-                <Container className="py-5 my-5">
+                <Container className="pt-5 pb-0 mt-5 mb-0">
                     <Row className="mb-5 text-center">
                         <Col lg={8} className="mx-auto">
                             <h2 className="display-4 fw-bold text-white mb-3">Coming Soon</h2>
