@@ -64,13 +64,17 @@ export async function POST(request) {
                     type: record.type,
                     count: record.count ? Number(record.count) : null,
                     bpm: record.bpm ? Number(record.bpm) : null,
-                    date: new Date(record.date), // Convert string to Date
+                    value: record.value ? Number(record.value) : null,
+                    duration: record.duration ? Number(record.duration) : null,
+                    systolic: record.systolic ? Number(record.systolic) : null,
+                    diastolic: record.diastolic ? Number(record.diastolic) : null,
+                    date: new Date(record.date),
                 }))
             });
         }
 
         // 4. Reset the "Sync Pending" flag since we just got the data
-        // Adjust 'healthSync' to match your schema model name
+
         await prisma.healthSync.upsert({
             where: { userId: user.id },
             update: { syncPending: false, lastSynced: new Date() },
