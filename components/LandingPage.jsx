@@ -124,117 +124,12 @@ export default function LandingPage() {
             {/* Content Overlay */}
             <div className="position-relative" style={{ zIndex: 20, background: '#0f172a', marginTop: '100vh', paddingTop: '10vh', borderRadius: '4rem 4rem 0 0', borderTop: '1px solid rgba(255,255,255,0.08)', minHeight: '100vh' }}>
 
-                {/* Advanced Feature Grid */}
+                {/* Tools Section */}
                 <Container className="py-5 my-5">
                     <Row className="mb-5 text-center">
                         <Col lg={8} className="mx-auto">
-                            <h2 className="display-4 fw-bold text-white mb-3">Intelligent Capabilities</h2>
-                            <p className="text-white-50 lead">Engineered for speed, accuracy, and total peace of mind.</p>
-                        </Col>
-                    </Row>
-                    <Row className="g-4">
-                        {[
-                            { title: 'Neural Diagnostics', desc: 'Deep learning models analyze symptoms with clinical precision in milliseconds.', icon: Zap, color: '#f59e0b' },
-                            { title: 'Geospatial Care', desc: 'Instant triangulation of nearest emergency services and specialist availability.', icon: Stethoscope, color: '#ef4444' },
-                            { title: 'Biometric Sync', desc: 'Real-time telemetry from your wearable devices for continuous monitoring.', icon: Activity, color: '#10b981' },
-                            { title: 'Secure Vault', desc: 'Military-grade encryption for your complete medical history and reports.', icon: Shield, color: '#3b82f6' },
-                            { title: 'Virtual Triage', desc: 'On-demand video consultations with certified specialists 24/7.', icon: Video, color: '#8b5cf6' },
-                            { title: 'Family Health', desc: 'Unified dashboard to manage health profiles for your entire family.', icon: Users, color: '#ec4899' },
-                        ].map((item, idx) => (
-                            <Col key={idx} md={4}>
-                                <div className="p-5 rounded-5 h-100 feature-card-advanced position-relative overflow-hidden group">
-                                    <div className="position-absolute top-0 end-0 p-4 opacity-10">
-                                        <item.icon size={100} strokeWidth={1} style={{ color: item.color }} />
-                                    </div>
-                                    <div className="mb-5 d-inline-flex p-3 rounded-2xl glass-icon" style={{ border: `1px solid ${item.color}40`, background: `${item.color}10` }}>
-                                        <item.icon size={32} style={{ color: item.color }} />
-                                    </div>
-                                    <h3 className="h3 fw-bold text-white mb-3">{item.title}</h3>
-                                    <p className="text-white-50 mb-4" style={{ lineHeight: '1.7' }}>{item.desc}</p>
-                                    <div className="d-flex align-items-center text-white small fw-bold tracking-wide text-uppercase feature-link">
-                                        Explore <ArrowRight size={14} className="ms-2" />
-                                    </div>
-                                </div>
-                            </Col>
-                        ))}
-                    </Row>
-                </Container>
-
-                {/* Interactive Process Visualization */}
-                <Container className="py-5 my-5">
-                    <div className="glass-panel p-5 rounded-5 border border-white border-opacity-10 position-relative overflow-hidden">
-                        <div className="position-absolute top-0 start-0 w-100 h-1 border-top border-danger opacity-50"></div>
-                        <Row className="align-items-center g-5">
-                            <Col lg={5}>
-                                <div className="d-flex align-items-center gap-2 mb-4">
-                                    <div className="w-2 h-2 rounded-circle bg-danger"></div>
-                                    <span className="text-danger fw-bold text-uppercase small tracking-widest">Workflow</span>
-                                </div>
-                                <h2 className="display-5 fw-bold text-white mb-5">Seamless Consultation Loop.</h2>
-                                <div className="process-steps">
-                                    {[
-                                        { step: '01', title: 'Profile Activation', desc: 'Secure biometric onboarding.' },
-                                        { step: '02', title: 'AI Triage', desc: 'Instant symptom vector analysis.' },
-                                        { step: '03', title: 'Treatment Protocol', desc: 'Digital prescription & recovery.' }
-                                    ].map((item, idx) => (
-                                        <div
-                                            key={idx}
-                                            className={`process-step d-flex gap-4 p-4 rounded-4 mb-3 transition-all cursor-pointer ${activeStep === idx ? 'bg-white bg-opacity-10 border border-white border-opacity-10' : ''}`}
-                                            onClick={() => setActiveStep(idx)}
-                                        >
-                                            <span className={`display-6 fw-bold ${activeStep === idx ? 'text-danger' : 'text-white-opacity-20'}`}>{item.step}</span>
-                                            <div>
-                                                <h4 className={`fw-bold h5 mb-1 ${activeStep === idx ? 'text-white' : 'text-white-50'}`}>{item.title}</h4>
-                                                <p className="text-white-50 mb-0 small">{item.desc}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </Col>
-                            <Col lg={7}>
-                                <div className="rounded-4 overflow-hidden border border-white border-opacity-10 shadow-2xl position-relative box-shadow-glow d-flex flex-column" style={{ background: '#020617', height: '700px' }}>
-
-                                    {/* Browser Chrome */}
-                                    <div className="border-bottom border-white border-opacity-05 px-4 py-3 d-flex align-items-center gap-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                                        <div className="d-flex gap-2">
-                                            <div className="rounded-circle bg-danger opacity-50" style={{ width: '10px', height: '10px' }}></div>
-                                            <div className="rounded-circle bg-warning opacity-50" style={{ width: '10px', height: '10px' }}></div>
-                                            <div className="rounded-circle bg-success opacity-50" style={{ width: '10px', height: '10px' }}></div>
-                                        </div>
-                                        <div className="flex-grow-1 rounded-pill px-3 py-1 text-center text-white-50 text-xs font-monospace d-flex align-items-center justify-content-center gap-2 border border-white border-opacity-05" style={{ background: 'rgba(0,0,0,0.2)' }}>
-                                            <Lock size={10} />
-                                            <span>secure.upcharsaathi.ai/patient-portal</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex-grow-1 position-relative bg-slate-950 p-0">
-                                        <AnimatePresence mode="wait">
-                                            <motion.div
-                                                key={activeStep}
-                                                initial={{ opacity: 0, x: 20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                exit={{ opacity: 0, x: -20 }}
-                                                transition={{ duration: 0.3 }}
-                                                className="w-100 h-100"
-                                            >
-                                                {activeStep === 0 && <DemoProfile />}
-                                                {activeStep === 1 && <DemoChatbot />}
-                                                {activeStep === 2 && <DemoPrescription />}
-                                            </motion.div>
-                                        </AnimatePresence>
-                                    </div>
-                                </div>
-                            </Col>
-                        </Row>
-                    </div>
-                </Container>
-
-                {/* Your Tools Section */}
-                <Container className="py-5 my-5">
-                    <Row className="mb-5 text-center">
-                        <Col lg={8} className="mx-auto">
-                            <h2 className="display-4 fw-bold text-white mb-3">Your Health Command Center</h2>
-                            <p className="text-white-50 lead">Powerful tools designed to give you complete control over your health journey.</p>
+                            <h2 className="display-4 fw-bold text-white mb-3">Explore Our Tools</h2>
+                            <p className="text-white-50 lead">Powerful AI-driven tools designed to give you complete control over your health journey.</p>
                         </Col>
                     </Row>
                     <Row className="g-4">
@@ -320,6 +215,111 @@ export default function LandingPage() {
                                         </div>
                                     </Link>
                                 </motion.div>
+                            </Col>
+                        ))}
+                    </Row>
+                </Container>
+
+                {/* Interactive Process Visualization */}
+                <Container className="py-5 my-5">
+                    <div className="glass-panel p-5 rounded-5 border border-white border-opacity-10 position-relative overflow-hidden">
+                        <div className="position-absolute top-0 start-0 w-100 h-1 border-top border-danger opacity-50"></div>
+                        <Row className="align-items-center g-5">
+                            <Col lg={5}>
+                                <div className="d-flex align-items-center gap-2 mb-4">
+                                    <div className="w-2 h-2 rounded-circle bg-danger"></div>
+                                    <span className="text-danger fw-bold text-uppercase small tracking-widest">Workflow</span>
+                                </div>
+                                <h2 className="display-5 fw-bold text-white mb-5">Seamless Consultation Loop.</h2>
+                                <div className="process-steps">
+                                    {[
+                                        { step: '01', title: 'Profile Activation', desc: 'Secure biometric onboarding.' },
+                                        { step: '02', title: 'AI Triage', desc: 'Instant symptom vector analysis.' },
+                                        { step: '03', title: 'Treatment Protocol', desc: 'Digital prescription & recovery.' }
+                                    ].map((item, idx) => (
+                                        <div
+                                            key={idx}
+                                            className={`process-step d-flex gap-4 p-4 rounded-4 mb-3 transition-all cursor-pointer ${activeStep === idx ? 'bg-white bg-opacity-10 border border-white border-opacity-10' : ''}`}
+                                            onClick={() => setActiveStep(idx)}
+                                        >
+                                            <span className={`display-6 fw-bold ${activeStep === idx ? 'text-danger' : 'text-white-opacity-20'}`}>{item.step}</span>
+                                            <div>
+                                                <h4 className={`fw-bold h5 mb-1 ${activeStep === idx ? 'text-white' : 'text-white-50'}`}>{item.title}</h4>
+                                                <p className="text-white-50 mb-0 small">{item.desc}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </Col>
+                            <Col lg={7}>
+                                <div className="rounded-4 overflow-hidden border border-white border-opacity-10 shadow-2xl position-relative box-shadow-glow d-flex flex-column" style={{ background: '#020617', height: '700px' }}>
+
+                                    {/* Browser Chrome */}
+                                    <div className="border-bottom border-white border-opacity-05 px-4 py-3 d-flex align-items-center gap-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                        <div className="d-flex gap-2">
+                                            <div className="rounded-circle bg-danger opacity-50" style={{ width: '10px', height: '10px' }}></div>
+                                            <div className="rounded-circle bg-warning opacity-50" style={{ width: '10px', height: '10px' }}></div>
+                                            <div className="rounded-circle bg-success opacity-50" style={{ width: '10px', height: '10px' }}></div>
+                                        </div>
+                                        <div className="flex-grow-1 rounded-pill px-3 py-1 text-center text-white-50 text-xs font-monospace d-flex align-items-center justify-content-center gap-2 border border-white border-opacity-05" style={{ background: 'rgba(0,0,0,0.2)' }}>
+                                            <Lock size={10} />
+                                            <span>secure.upcharsaathi.ai/patient-portal</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex-grow-1 position-relative bg-slate-950 p-0">
+                                        <AnimatePresence mode="wait">
+                                            <motion.div
+                                                key={activeStep}
+                                                initial={{ opacity: 0, x: 20 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: -20 }}
+                                                transition={{ duration: 0.3 }}
+                                                className="w-100 h-100"
+                                            >
+                                                {activeStep === 0 && <DemoProfile />}
+                                                {activeStep === 1 && <DemoChatbot />}
+                                                {activeStep === 2 && <DemoPrescription />}
+                                            </motion.div>
+                                        </AnimatePresence>
+                                    </div>
+                                </div>
+                            </Col>
+                        </Row>
+                    </div>
+                </Container>
+
+                {/* Coming Soon Section */}
+                <Container className="py-5 my-5">
+                    <Row className="mb-5 text-center">
+                        <Col lg={8} className="mx-auto">
+                            <h2 className="display-4 fw-bold text-white mb-3">Coming Soon</h2>
+                            <p className="text-white-50 lead">Next-generation capabilities currently in development for UpcharSaathi Pro.</p>
+                        </Col>
+                    </Row>
+                    <Row className="g-4">
+                        {[
+                            { title: 'Neural Diagnostics', desc: 'Deep learning models analyze symptoms with clinical precision in milliseconds.', icon: Zap, color: '#f59e0b' },
+                            { title: 'Geospatial Care', desc: 'Instant triangulation of nearest emergency services and specialist availability.', icon: Stethoscope, color: '#ef4444' },
+                            { title: 'Biometric Sync', desc: 'Real-time telemetry from your wearable devices for continuous monitoring.', icon: Activity, color: '#10b981' },
+                            { title: 'Secure Vault', desc: 'Military-grade encryption for your complete medical history and reports.', icon: Shield, color: '#3b82f6' },
+                            { title: 'Virtual Triage', desc: 'On-demand video consultations with certified specialists 24/7.', icon: Video, color: '#8b5cf6' },
+                            { title: 'Family Health', desc: 'Unified dashboard to manage health profiles for your entire family.', icon: Users, color: '#ec4899' },
+                        ].map((item, idx) => (
+                            <Col key={idx} md={4}>
+                                <div className="p-5 rounded-5 h-100 feature-card-advanced position-relative overflow-hidden group">
+                                    <div className="position-absolute top-0 end-0 p-4 opacity-10">
+                                        <item.icon size={100} strokeWidth={1} style={{ color: item.color }} />
+                                    </div>
+                                    <div className="mb-5 d-inline-flex p-3 rounded-2xl glass-icon" style={{ border: `1px solid ${item.color}40`, background: `${item.color}10` }}>
+                                        <item.icon size={32} style={{ color: item.color }} />
+                                    </div>
+                                    <h3 className="h3 fw-bold text-white mb-3">{item.title}</h3>
+                                    <p className="text-white-50 mb-4" style={{ lineHeight: '1.7' }}>{item.desc}</p>
+                                    <div className="d-flex align-items-center text-white-50 small fw-bold tracking-wide text-uppercase feature-link">
+                                        In Development <ArrowRight size={14} className="ms-2" />
+                                    </div>
+                                </div>
                             </Col>
                         ))}
                     </Row>
