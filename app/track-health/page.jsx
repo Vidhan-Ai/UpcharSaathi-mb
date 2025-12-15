@@ -37,22 +37,8 @@ import { useUser } from '@stackframe/stack'
 // import { getFitbitData, disconnectFitbit } from '../actions/fitbit' // Removed
 
 // --- Mock Data (Fallback) ---
-const MOCK_WEEKLY_STEPS_DATA = [
-    { name: 'Mon', steps: 6500, calories: 320 },
-    { name: 'Tue', steps: 8200, calories: 410 },
-    { name: 'Wed', steps: 10500, calories: 520 },
-    { name: 'Thu', steps: 7800, calories: 390 },
-    { name: 'Fri', steps: 9200, calories: 460 },
-    { name: 'Sat', steps: 12000, calories: 600 },
-    { name: 'Sun', steps: 5400, calories: 270 },
-]
+// --- Mock Data Removed ---
 
-const MOCK_ACTIVITY_DISTRIBUTION = [
-    { name: 'Walking', value: 65, color: '#3b82f6' },
-    { name: 'Running', value: 20, color: '#f59e0b' },
-    { name: 'Cycling', value: 10, color: '#10b981' },
-    { name: 'Yoga', value: 5, color: '#8b5cf6' },
-]
 
 // --- Styles ---
 const styles = {
@@ -92,8 +78,8 @@ export default function TrackHealthPage() {
     const [lastUpdated, setLastUpdated] = useState(null)
 
     // Data State
-    const [activityData, setActivityData] = useState(MOCK_WEEKLY_STEPS_DATA)
-    const [activityDistribution, setActivityDistribution] = useState(MOCK_ACTIVITY_DISTRIBUTION)
+    const [activityData, setActivityData] = useState([])
+    const [activityDistribution, setActivityDistribution] = useState([])
     const [stepsToday, setStepsToday] = useState(0)
     const [caloriesToday, setCaloriesToday] = useState(0)
     const [distanceToday, setDistanceToday] = useState(0)
@@ -207,7 +193,7 @@ export default function TrackHealthPage() {
         });
 
         const sortedData = Array.from(dayMap.values()); // Need to sort by date actually but map order preserved mostly if inserted sequentially
-        setActivityData(sortedData.length > 0 ? sortedData : MOCK_WEEKLY_STEPS_DATA);
+        setActivityData(sortedData);
 
         setStepsToday(steps);
         setCaloriesToday(cals);
