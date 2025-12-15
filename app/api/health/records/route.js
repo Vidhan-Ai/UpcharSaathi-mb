@@ -1,6 +1,39 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { verifyAndGetUser } from '@/lib/googleAuth';
+import { stackServerApp } from "@/stack/server";
+
+// ⚠️ CRITICAL: Function must be named 'POST'
+export async function GET(request) {
+    // Authenticate Web User (Stack Auth)
+    const user = await stackServerApp.getUser();
+
+    if (!user || !user.primaryEmail) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    try {
+        const dbUser = await prisma.users.findUnique({
+            where: { email: user.primaryEmail }
+        });
+
+        if (!dbUser) {
+            return NextResponse.json([], { status: 200 }); // No user in DB yet = no records
+        }
+
+        const records = await prisma.healthRecord.findMany({
+            where: { userId: dbUser.id },
+            orderBy: { date: 'desc' },
+            take: 50
+        });
+
+        return NextResponse.json(records);
+
+    } catch (error) {
+        console.error("Fetch error:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    }
+}
 
 export async function POST(request) {
 
