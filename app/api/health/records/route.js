@@ -23,9 +23,7 @@ export async function POST(request) {
 
         console.log(`Processing ${data.length} records for ${user.email}`);
 
-        // 3. Save to Database (Example: loop or createMany)
-        // Adjust 'healthRecord' to match your actual schema model name
-        // Assuming you have a model like: model HealthRecord { ... }
+
         if (data.length > 0) {
             await prisma.healthRecord.createMany({
                 data: data.map(record => ({
@@ -42,8 +40,8 @@ export async function POST(request) {
         // Adjust 'healthSync' to match your schema model name
         await prisma.healthSync.upsert({
             where: { userId: user.id },
-            update: { syncPending: false, lastSync: new Date() },
-            create: { userId: user.id, syncPending: false, lastSync: new Date() }
+            update: { syncPending: false, lastSynced: new Date() },
+            create: { userId: user.id, syncPending: false, lastSynced: new Date() }
         });
 
         return NextResponse.json({ status: "success", count: data.length });

@@ -173,3 +173,15 @@ model HealthSync {
   data        Json?
   updatedAt   DateTime @updatedAt
 }
+
+model HealthRecord {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  count     Int?
+  bpm       Int?
+  date      DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
