@@ -5,7 +5,6 @@ import { stackServerApp } from "@/stack/server";
 
 export async function POST(request) {
     // Authenticate Web User
-    // Authenticate Web User
     const user = await stackServerApp.getUser();
     if (!user || !user.primaryEmail) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -13,12 +12,27 @@ export async function POST(request) {
 
     try {
         // Resolve to Prisma User (matching Android Google Auth identity)
-        const dbUser = await prisma.users.findUnique({
+        let dbUser = await prisma.users.findUnique({
             where: { email: user.primaryEmail }
         });
 
+        // JIT Provisioning: Create user if they don't exist in our DB
         if (!dbUser) {
-            return NextResponse.json({ error: "User record not found" }, { status: 404 });
+            console.log(`Creating new DB user for ${user.primaryEmail}`);
+            try {
+                dbUser = await prisma.users.create({
+                    data: {
+                        email: user.primaryEmail,
+                        name: user.displayName || user.primaryEmail.split('@')[0],
+                        password_hash: "google-auth-managed", // Placeholder
+                        email_verified: true,
+                        is_active: true
+                    }
+                });
+            } catch (createError) {
+                console.error("Failed to provision user:", createError);
+                return NextResponse.json({ error: "Failed to provision user account" }, { status: 500 });
+            }
         }
 
         console.log(`Requesting sync for user: ${dbUser.email} (${dbUser.id})`);
