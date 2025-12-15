@@ -180,6 +180,10 @@ model HealthRecord {
   type      String
   count     Int?
   bpm       Int?
+  value     Float?
+  duration  Float?
+  systolic  Int?
+  diastolic Int?
   date      DateTime
   createdAt DateTime @default(now())
 
