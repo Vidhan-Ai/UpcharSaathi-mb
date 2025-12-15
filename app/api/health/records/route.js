@@ -1,36 +1,55 @@
-
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { stackServerApp } from "@/stack/server";
+import { verifyAndGetUser } from '@/lib/googleAuth';
 
-export async function GET(request) {
-    // Authenticate Web User
-    // Authenticate Web User
-    const user = await stackServerApp.getUser();
-    if (!user || !user.primaryEmail) {
+export async function POST(request) {
+
+    // 1. Verify User
+    const user = await verifyAndGetUser(request);
+
+    if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     try {
-        const dbUser = await prisma.users.findUnique({
-            where: { email: user.primaryEmail }
-        });
+        // 2. Parse the JSON body
+        // In App Router, we use await request.json()
+        const body = await request.json();
+        const { data } = body; // Matches "UploadBody" in Android
 
-        if (!dbUser) {
-            // If local user doesn't exist, they can't have synced data
-            return NextResponse.json([]);
+        if (!data || !Array.isArray(data)) {
+            return NextResponse.json({ error: "Invalid data format" }, { status: 400 });
         }
 
-        const record = await prisma.healthSync.findUnique({
-            where: { userId: dbUser.id }
+        console.log(`Processing ${data.length} records for ${user.email}`);
+
+        // 3. Save to Database (Example: loop or createMany)
+        // Adjust 'healthRecord' to match your actual schema model name
+        // Assuming you have a model like: model HealthRecord { ... }
+        if (data.length > 0) {
+            await prisma.healthRecord.createMany({
+                data: data.map(record => ({
+                    userId: user.id,
+                    type: record.type,
+                    count: record.count ? Number(record.count) : null,
+                    bpm: record.bpm ? Number(record.bpm) : null,
+                    date: new Date(record.date), // Convert string to Date
+                }))
+            });
+        }
+
+        // 4. Reset the "Sync Pending" flag since we just got the data
+        // Adjust 'healthSync' to match your schema model name
+        await prisma.healthSync.upsert({
+            where: { userId: user.id },
+            update: { syncPending: false, lastSync: new Date() },
+            create: { userId: user.id, syncPending: false, lastSync: new Date() }
         });
 
-        // If no data, return empty array
-        const healthData = record?.data || [];
+        return NextResponse.json({ status: "success", count: data.length });
 
-        return NextResponse.json(healthData);
     } catch (error) {
-        console.error("Error fetching health data:", error);
+        console.error("Upload error:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
