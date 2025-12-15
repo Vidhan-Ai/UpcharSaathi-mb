@@ -73,7 +73,7 @@ export async function POST(request) {
             });
         }
 
-        // 4. Reset the "Sync Pending" flag since we just got the data
+
 
         await prisma.healthSync.upsert({
             where: { userId: user.id },

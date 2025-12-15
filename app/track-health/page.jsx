@@ -292,7 +292,21 @@ export default function TrackHealthPage() {
                             transition={{ duration: 0.5 }}
                         >
                             <div className="d-flex justify-content-end mb-3">
-                                {/* Disconnect button removed for web */}
+                                <Button
+                                    variant="outline-light"
+                                    size="sm"
+                                    onClick={handleRequestSync}
+                                    disabled={isLoading || syncStatus === 'polling' || syncStatus === 'requesting'}
+                                    className="d-flex align-items-center gap-2"
+                                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                                >
+                                    {(isLoading || syncStatus === 'polling' || syncStatus === 'requesting') ? (
+                                        <Spinner size="sm" animation="border" />
+                                    ) : (
+                                        <Smartphone size={16} />
+                                    )}
+                                    {syncStatus === 'polling' ? 'Syncing...' : 'Sync Now'}
+                                </Button>
                             </div>
 
                             {/* Stats Grid */}
