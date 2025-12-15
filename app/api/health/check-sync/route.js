@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { verifyAndGetUser } from '@/lib/googleAuth';
 
-export async function GET(request) {
+export async function handler(req, res) {
+    if (req.method !== 'GET') {
+        return res.status(405).json({ error: 'Method Not Allowed' });
+    }
     // 1. Verify Google Token
     const user = await verifyAndGetUser(request);
 
