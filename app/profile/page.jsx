@@ -648,36 +648,40 @@ export default function ProfilePage() {
 
             <style jsx global>{`
                 .profile-page-wrapper {
-                    background-color: #f8fafc;
+                    background: #0f172a;
                     min-height: 100vh;
                 }
                 
                 .profile-card {
                     border-radius: 1rem;
                     overflow: hidden;
+                    background: rgba(30, 41, 59, 0.4);
+                    backdrop-filter: blur(20px);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
                 }
 
                 .profile-header-bg {
                     height: 80px;
-                    background: linear-gradient(135deg, #dc2626 0%, #fb7185 100%);
+                    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
                 }
 
                 .profile-avatar-wrapper {
                     margin-top: -40px;
                     padding: 4px;
-                    background: white;
+                    background: rgba(30, 41, 59, 0.8);
+                    backdrop-filter: blur(10px);
                     border-radius: 50%;
                     width: 88px;
                     height: 88px;
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
                 }
 
                 .profile-avatar {
                     width: 100%;
                     height: 100%;
                     border-radius: 50%;
-                    background: #fef2f2;
-                    color: #dc2626;
+                    background: rgba(239, 68, 68, 0.2);
+                    color: #ef4444;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -687,6 +691,9 @@ export default function ProfilePage() {
 
                 .navigation-card {
                     border-radius: 1rem;
+                    background: rgba(30, 41, 59, 0.4);
+                    backdrop-filter: blur(20px);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
                 }
 
                 .nav-item-btn {
@@ -697,20 +704,20 @@ export default function ProfilePage() {
                     border: none;
                     background: transparent;
                     border-radius: 0.5rem;
-                    color: #64748b;
+                    color: rgba(255, 255, 255, 0.7);
                     font-weight: 500;
                     transition: all 0.2s ease;
                     text-align: left;
                 }
 
                 .nav-item-btn:hover {
-                    background-color: #fef2f2;
-                    color: #dc2626;
+                    background-color: rgba(239, 68, 68, 0.1);
+                    color: #ef4444;
                 }
 
                 .nav-item-btn.active {
-                    background-color: #fef2f2;
-                    color: #dc2626;
+                    background-color: rgba(239, 68, 68, 0.15);
+                    color: #ef4444;
                     font-weight: 600;
                 }
 
@@ -719,35 +726,67 @@ export default function ProfilePage() {
                 }
 
                 .logout-btn:hover {
-                    background-color: #fef2f2;
-                    color: #dc2626;
+                    background-color: rgba(239, 68, 68, 0.1);
+                    color: #ef4444;
                 }
 
                 .content-card {
                     border-radius: 1rem;
                     overflow: hidden;
+                    background: rgba(30, 41, 59, 0.4);
+                    backdrop-filter: blur(20px);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                }
+
+                .content-card .card-header {
+                    background: rgba(255, 255, 255, 0.02) !important;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+                }
+
+                .content-card h4, .content-card h5, .content-card h6 {
+                    color: #fff;
+                }
+
+                .content-card .text-primary {
+                    color: #ef4444 !important;
                 }
 
                 .modern-input {
                     border-radius: 0.5rem;
                     padding: 0.75rem 1rem;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    background: rgba(0, 0, 0, 0.2);
+                    color: #fff;
                     transition: all 0.2s;
                 }
 
                 .modern-input:focus {
-                    border-color: #fb7185;
-                    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+                    border-color: #ef4444;
+                    background: rgba(0, 0, 0, 0.3);
+                    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+                    color: #fff;
+                }
+
+                .modern-input:disabled {
+                    background: rgba(255, 255, 255, 0.05);
+                    color: rgba(255, 255, 255, 0.5);
+                }
+
+                .modern-input option {
+                    background: #1e293b;
+                    color: #fff;
                 }
 
                 .address-card {
                     transition: all 0.2s;
-                    background: #fff;
+                    background: rgba(255, 255, 255, 0.05);
+                    border: 1px solid rgba(255, 255, 255, 0.1) !important;
                 }
 
                 .address-card:hover {
-                    border-color: #fb7185 !important;
-                    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.05);
+                    border-color: #ef4444 !important;
+                    background: rgba(239, 68, 68, 0.05);
+                    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
                 }
 
                 .btn-link-custom {
@@ -768,7 +807,7 @@ export default function ProfilePage() {
                 }
 
                 .order-item:hover {
-                    background-color: #fef2f2;
+                    background-color: rgba(239, 68, 68, 0.05);
                 }
 
                 /* Timeline Styles */
@@ -784,7 +823,7 @@ export default function ProfilePage() {
                     top: 0;
                     bottom: 0;
                     width: 2px;
-                    background: #e2e8f0;
+                    background: rgba(255, 255, 255, 0.1);
                 }
 
                 .timeline-item {
@@ -798,21 +837,25 @@ export default function ProfilePage() {
                     top: 1rem;
                     width: 12px;
                     height: 12px;
+                    background: #ef4444;
                     border-radius: 50%;
-                    background: #dc2626;
-                    border: 2px solid white;
-                    box-shadow: 0 0 0 2px #fecaca;
-                    transform: translateX(-50%);
-                    z-index: 1;
+                    border: 3px solid #0f172a;
+                    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
+                }
+
+                .timeline-content .card {
+                    background: rgba(255, 255, 255, 0.05);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
                 }
 
                 .hover-card {
-                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                    transition: all 0.2s;
                 }
 
                 .hover-card:hover {
+                    background: rgba(255, 255, 255, 0.07) !important;
                     transform: translateY(-2px);
-                    box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important;
+                    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
                 }
 
                 .appointment-ticket {
@@ -831,12 +874,58 @@ export default function ProfilePage() {
                 @keyframes fadeInUp {
                     from {
                         opacity: 0;
-                        transform: translateY(10px);
+                        transform: translateY(20px);
                     }
                     to {
                         opacity: 1;
                         transform: translateY(0);
                     }
+                }
+
+                .fade-in {
+                    animation: fadeIn 0.3s ease-out;
+                }
+
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+
+                /* Modal Dark Theme */
+                .modal-content {
+                    background: rgba(30, 41, 59, 0.95);
+                    backdrop-filter: blur(20px);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    color: #fff;
+                }
+
+                .modal-header {
+                    border-bottom-color: rgba(255, 255, 255, 0.1);
+                }
+
+                .modal-header .btn-close {
+                    filter: invert(1);
+                }
+
+                .modal-footer {
+                    border-top-color: rgba(255, 255, 255, 0.1);
+                }
+
+                /* Badge overrides for dark theme */
+                .badge.bg-light {
+                    background: rgba(255, 255, 255, 0.1) !important;
+                    color: #fff !important;
+                    border-color: rgba(255, 255, 255, 0.2) !important;
+                }
+
+                /* Text color overrides */
+                .text-muted {
+                    color: rgba(255, 255, 255, 0.5) !important;
+                }
+
+                /* Spinner for dark theme */
+                .spinner-border {
+                    color: #ef4444 !important;
                 }
             `}</style>
         </div>

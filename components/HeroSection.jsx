@@ -15,7 +15,6 @@ export default function HeroSection({ isLoaded }) {
             transition={{ duration: 0.8 }}
             className="position-relative overflow-hidden"
             style={{
-                background: 'linear-gradient(to right, #fef2f2, #ffe4e6, #fef2f2)',
                 paddingTop: '5rem',
                 paddingBottom: '5rem'
             }}

@@ -67,7 +67,7 @@ export default function ContactUsClient() {
     };
 
     return (
-        <div className="min-vh-100 py-5" style={{ background: 'linear-gradient(to right, #fef2f2, #ffe4e6, #fef2f2)' }}>
+        <div className="min-vh-100 py-5" style={{ background: '#0f172a' }}>
             <Container>
                 {/* Hero Section */}
                 <motion.div
@@ -77,7 +77,7 @@ export default function ContactUsClient() {
                     transition={{ duration: 0.6 }}
                     className="text-center mb-5"
                 >
-                    <div className="d-inline-flex align-items-center justify-content-center p-3 rounded-circle mb-4 shadow-sm" style={{ background: 'white' }}>
+                    <div className="d-inline-flex align-items-center justify-content-center p-3 rounded-circle mb-4 shadow-sm" style={{ background: 'rgba(239, 68, 68, 0.2)' }}>
                         <MessageSquare size={40} className="text-danger" />
                     </div>
                     <h1 className="display-4 fw-bold mb-4" style={{
@@ -87,7 +87,7 @@ export default function ContactUsClient() {
                     }}>
                         Get in Touch
                     </h1>
-                    <p className="lead text-muted mx-auto" style={{ maxWidth: '700px' }}>
+                    <p className="lead text-white-50 mx-auto" style={{ maxWidth: '700px' }}>
                         Have questions about your health or our platform? We're here to help you 24/7.
                     </p>
                 </motion.div>
@@ -102,42 +102,42 @@ export default function ContactUsClient() {
                             className="d-flex flex-column gap-4"
                         >
                             <motion.div variants={fadeIn}>
-                                <Card className="border-0 shadow-sm hover-shadow transition-all" style={{ borderRadius: '1rem' }}>
+                                <Card className="border-0 shadow-sm hover-shadow transition-all" style={{ borderRadius: '1rem', background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' }}>
                                     <Card.Body className="p-4 d-flex align-items-center gap-4">
                                         <div className="p-3 rounded-circle bg-primary bg-opacity-10 text-primary">
                                             <Mail size={24} />
                                         </div>
                                         <div>
-                                            <h6 className="fw-bold mb-1">Email Us</h6>
-                                            <p className="text-muted mb-0">support@upcharsaathi.com</p>
+                                            <h6 className="fw-bold mb-1 text-white">Email Us</h6>
+                                            <p className="text-white-50 mb-0">support@upcharsaathi.com</p>
                                         </div>
                                     </Card.Body>
                                 </Card>
                             </motion.div>
 
                             <motion.div variants={fadeIn}>
-                                <Card className="border-0 shadow-sm hover-shadow transition-all" style={{ borderRadius: '1rem' }}>
+                                <Card className="border-0 shadow-sm hover-shadow transition-all" style={{ borderRadius: '1rem', background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' }}>
                                     <Card.Body className="p-4 d-flex align-items-center gap-4">
                                         <div className="p-3 rounded-circle bg-success bg-opacity-10 text-success">
                                             <Phone size={24} />
                                         </div>
                                         <div>
-                                            <h6 className="fw-bold mb-1">Call Us</h6>
-                                            <p className="text-muted mb-0">+91-6393172708</p>
+                                            <h6 className="fw-bold mb-1 text-white">Call Us</h6>
+                                            <p className="text-white-50 mb-0">+91-6393172708</p>
                                         </div>
                                     </Card.Body>
                                 </Card>
                             </motion.div>
 
                             <motion.div variants={fadeIn}>
-                                <Card className="border-0 shadow-sm hover-shadow transition-all" style={{ borderRadius: '1rem' }}>
+                                <Card className="border-0 shadow-sm hover-shadow transition-all" style={{ borderRadius: '1rem', background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' }}>
                                     <Card.Body className="p-4 d-flex align-items-center gap-4">
                                         <div className="p-3 rounded-circle bg-danger bg-opacity-10 text-danger">
                                             <MapPin size={24} />
                                         </div>
                                         <div>
-                                            <h6 className="fw-bold mb-1">Visit Us</h6>
-                                            <p className="text-muted mb-0">
+                                            <h6 className="fw-bold mb-1 text-white">Visit Us</h6>
+                                            <p className="text-white-50 mb-0">
                                                 Galgotias College Of Engineering and Technology<br />
                                                 Greater Noida, Uttar Pradesh, India
                                             </p>
@@ -147,14 +147,14 @@ export default function ContactUsClient() {
                             </motion.div>
 
                             <motion.div variants={fadeIn}>
-                                <Card className="border-0 shadow-sm hover-shadow transition-all" style={{ borderRadius: '1rem' }}>
+                                <Card className="border-0 shadow-sm hover-shadow transition-all" style={{ borderRadius: '1rem', background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' }}>
                                     <Card.Body className="p-4 d-flex align-items-center gap-4">
                                         <div className="p-3 rounded-circle bg-warning bg-opacity-10 text-warning">
                                             <Clock size={24} />
                                         </div>
                                         <div>
-                                            <h6 className="fw-bold mb-1">Working Hours</h6>
-                                            <p className="text-muted mb-0">
+                                            <h6 className="fw-bold mb-1 text-white">Working Hours</h6>
+                                            <p className="text-white-50 mb-0">
                                                 Mon - Fri: 9:00 AM - 6:00 PM<br />
                                                 24/7 Emergency Support
                                             </p>
@@ -172,10 +172,10 @@ export default function ContactUsClient() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.6, delay: 0.2 }}
                         >
-                            <Card className="border-0 shadow-lg" style={{ borderRadius: '1.5rem', overflow: 'hidden' }}>
+                            <Card className="border-0 shadow-lg" style={{ borderRadius: '1.5rem', overflow: 'hidden', background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' }}>
                                 <div className="h-1 bg-danger" style={{ height: '4px', background: 'linear-gradient(to right, #dc2626, #fb7185)' }} />
                                 <Card.Body className="p-5">
-                                    <h3 className="fw-bold mb-4">Send us a Message</h3>
+                                    <h3 className="fw-bold mb-4 text-white">Send us a Message</h3>
 
                                     {status.success && (
                                         <Alert variant="success" onClose={() => setStatus(prev => ({ ...prev, success: false }))} dismissible className="rounded-3 border-0 bg-success bg-opacity-10 text-success">
@@ -192,7 +192,7 @@ export default function ContactUsClient() {
                                         <Row>
                                             <Col md={6}>
                                                 <Form.Group className="mb-4">
-                                                    <Form.Label className="text-muted small fw-bold text-uppercase">Your Name</Form.Label>
+                                                    <Form.Label className="text-white-50 small fw-bold text-uppercase">Your Name</Form.Label>
                                                     <Form.Control
                                                         type="text"
                                                         name="name"
@@ -200,13 +200,13 @@ export default function ContactUsClient() {
                                                         onChange={handleChange}
                                                         placeholder="John Doe"
                                                         required
-                                                        className="bg-light border-0 p-3 rounded-3"
+                                                        className="bg-white bg-opacity-10 border-0 p-3 rounded-3 text-white"
                                                     />
                                                 </Form.Group>
                                             </Col>
                                             <Col md={6}>
                                                 <Form.Group className="mb-4">
-                                                    <Form.Label className="text-muted small fw-bold text-uppercase">Your Email</Form.Label>
+                                                    <Form.Label className="text-white-50 small fw-bold text-uppercase">Your Email</Form.Label>
                                                     <Form.Control
                                                         type="email"
                                                         name="email"
@@ -214,14 +214,14 @@ export default function ContactUsClient() {
                                                         onChange={handleChange}
                                                         placeholder="john@example.com"
                                                         required
-                                                        className="bg-light border-0 p-3 rounded-3"
+                                                        className="bg-white bg-opacity-10 border-0 p-3 rounded-3 text-white"
                                                     />
                                                 </Form.Group>
                                             </Col>
                                         </Row>
 
                                         <Form.Group className="mb-4">
-                                            <Form.Label className="text-muted small fw-bold text-uppercase">Message</Form.Label>
+                                            <Form.Label className="text-white-50 small fw-bold text-uppercase">Message</Form.Label>
                                             <Form.Control
                                                 as="textarea"
                                                 name="message"
@@ -230,7 +230,7 @@ export default function ContactUsClient() {
                                                 rows={5}
                                                 placeholder="How can we help you?"
                                                 required
-                                                className="bg-light border-0 p-3 rounded-3"
+                                                className="bg-white bg-opacity-10 border-0 p-3 rounded-3 text-white"
                                                 style={{ resize: 'none' }}
                                             />
                                         </Form.Group>
@@ -239,7 +239,7 @@ export default function ContactUsClient() {
                                             type="submit"
                                             disabled={status.loading}
                                             className="w-100 py-3 fw-bold border-0 rounded-3 d-flex align-items-center justify-content-center gap-2"
-                                            style={{ background: 'linear-gradient(to right, #dc2626, #fb7185)', transition: 'transform 0.2s' }}
+                                            style={{ background: 'linear-gradient(to right, #dc2626, #fb7185)', transition: 'transform 0.2s', boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)' }}
                                         >
                                             {status.loading ? (
                                                 <>
@@ -270,12 +270,16 @@ export default function ContactUsClient() {
             <style jsx global>{`
                 .hover-shadow:hover {
                     transform: translateY(-5px);
-                    box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
+                    box-shadow: 0 1rem 3rem rgba(0,0,0,.3)!important;
                 }
                 .form-control:focus {
                     box-shadow: none;
-                    background-color: #fff;
+                    background-color: rgba(255, 255, 255, 0.15) !important;
                     border: 1px solid #fb7185;
+                    color: white !important;
+                }
+                .form-control::placeholder {
+                    color: rgba(255, 255, 255, 0.5) !important;
                 }
             `}</style>
         </div>

@@ -6,14 +6,15 @@ import { Container, Row, Col } from 'react-bootstrap';
 
 export default function Footer() {
   const footerStyle = {
-    backgroundColor: '#ffffff',
-    borderTop: '1px solid #fecaca',
+    backgroundColor: 'rgba(15, 23, 42, 0.4)',
+    backdropFilter: 'blur(10px)',
+    borderTop: '1px solid rgba(255, 255, 255, 0.05)',
     padding: '3rem 0 2rem 0',
     marginTop: 'auto'
   }
 
   const brandStyle = {
-    background: 'linear-gradient(to right, #dc2626, #fb7185)',
+    background: 'linear-gradient(to right, #ef4444, #f87171)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text',
@@ -26,16 +27,16 @@ export default function Footer() {
         <Row className="gy-4">
           <Col md={3}>
             <h4 className="h5 fw-bold mb-3" style={brandStyle}>UpcharSaathi</h4>
-            <p className="small text-muted">&copy; 2025 UpcharSaathi. All rights reserved.</p>
+            <p className="small text-white-50">&copy; 2025 UpcharSaathi. All rights reserved.</p>
           </Col>
 
           <Col md={3}>
-            <h4 className="h5 fw-bold mb-3 text-dark">Quick Links</h4>
+            <h4 className="h5 fw-bold mb-3 text-white">Quick Links</h4>
             <ul className="list-unstyled">
               <li className="mb-2">
                 <Link
                   href="/contact-us"
-                  className="text-muted text-decoration-none hover-link"
+                  className="text-white-50 text-decoration-none hover-link"
                   style={{ transition: 'all 0.3s' }}
                 >
                   Contact Us
@@ -44,7 +45,7 @@ export default function Footer() {
               <li className="mb-2">
                 <Link
                   href="/about-us"
-                  className="text-muted text-decoration-none hover-link"
+                  className="text-white-50 text-decoration-none hover-link"
                   style={{ transition: 'all 0.3s' }}
                 >
                   About Us
@@ -53,7 +54,7 @@ export default function Footer() {
               <li className="mb-2">
                 <Link
                   href="/privacy-policy"
-                  className="text-muted text-decoration-none hover-link"
+                  className="text-white-50 text-decoration-none hover-link"
                   style={{ transition: 'all 0.3s' }}
                 >
                   Privacy Policy
@@ -62,7 +63,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/terms-of-service"
-                  className="text-muted text-decoration-none hover-link"
+                  className="text-white-50 text-decoration-none hover-link"
                   style={{ transition: 'all 0.3s' }}
                 >
                   Terms of Service
@@ -72,13 +73,13 @@ export default function Footer() {
           </Col>
 
           <Col md={3}>
-            <h4 className="h5 fw-bold mb-3 text-dark">Services</h4>
+            <h4 className="h5 fw-bold mb-3 text-white">Services</h4>
             <ul className="list-unstyled">
 
               <li className="mb-2">
                 <Link
                   href="/doctors"
-                  className="text-muted text-decoration-none hover-link"
+                  className="text-white-50 text-decoration-none hover-link"
                 >
                   Doctors
                 </Link>
@@ -86,7 +87,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/first-aid"
-                  className="text-muted text-decoration-none hover-link"
+                  className="text-white-50 text-decoration-none hover-link"
                 >
                   First Aid
                 </Link>
@@ -95,7 +96,7 @@ export default function Footer() {
           </Col>
 
           <Col md={3}>
-            <h4 className="h5 fw-bold mb-3 text-dark">Follow Us</h4>
+            <h4 className="h5 fw-bold mb-3 text-white">Follow Us</h4>
             <div className="d-flex gap-3">
               {[
                 { label: 'Twitter', href: '#' },
@@ -105,7 +106,7 @@ export default function Footer() {
                 <a
                   key={social.label}
                   href={social.href}
-                  className="text-muted text-decoration-none hover-link"
+                  className="text-white-50 text-decoration-none hover-link"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -118,7 +119,7 @@ export default function Footer() {
       </Container>
       <style jsx global>{`
         .hover-link:hover {
-          color: #dc2626 !important;
+          color: #ef4444 !important;
           transform: translateX(3px);
           display: inline-block;
         }

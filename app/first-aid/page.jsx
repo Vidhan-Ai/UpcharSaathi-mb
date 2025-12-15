@@ -135,7 +135,7 @@ export default function FirstAidPage() {
   }
 
   return (
-    <div className="min-vh-100 py-5" style={{ background: 'linear-gradient(to right, #fef2f2, #ffe4e6, #fef2f2)' }}>
+    <div className="min-vh-100 py-5" style={{ background: '#0f172a' }}>
       <Container>
         <div className="text-center mb-5">
           <h1 className="display-4 fw-bold mb-4" style={headerGradient}>
@@ -148,51 +148,55 @@ export default function FirstAidPage() {
             margin: '1rem auto',
             borderRadius: '2px'
           }} />
-          <p className="fs-5 text-muted">Quick reference for common medical emergencies and conditions</p>
+          <p className="fs-5 text-white-50">Quick reference for common medical emergencies and conditions</p>
         </div>
 
-        <div className="mb-4 position-relative" style={{ background: '#ffffff', border: '1px solid #fecaca', borderRadius: '1rem', padding: '1rem', boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.1)' }}>
-          <Search className="position-absolute" style={{ left: '1.75rem', top: '50%', transform: 'translateY(-50%)', color: '#dc2626' }} size={16} />
+        <div className="mb-4 position-relative" style={{ background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '1rem', padding: '1rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.2)' }}>
+          <Search className="position-absolute" style={{ left: '1.75rem', top: '50%', transform: 'translateY(-50%)', color: '#ef4444' }} size={16} />
           <Form.Control
             placeholder="Search for first aid instructions..."
-            className="ps-5 bg-light text-dark border-light"
-            style={{ border: '1px solid #fecaca' }}
+            className="ps-5 text-white"
+            style={{
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: 'rgba(0, 0, 0, 0.2)',
+              color: 'white'
+            }}
           />
         </div>
 
         <Row className="g-4">
           {/* Emergency Hotlines */}
           <Col lg={12}>
-            <Card style={{ background: '#ffffff', border: '1px solid #fecaca', borderRadius: '1rem', boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.1)' }} className="text-dark">
+            <Card style={{ background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '1rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.2)' }} className="text-white">
               <Card.Body>
                 <h5 className="fw-bold mb-4" style={headerGradient}>Emergency Hotlines</h5>
                 <Row className="g-3">
                   <Col md={3} sm={6}>
-                    <div style={{ background: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '0.5rem', padding: '1.5rem' }} className="text-center h-100">
+                    <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '0.5rem', padding: '1.5rem' }} className="text-center h-100">
                       <h6 className="text-danger fw-bold">National Emergency</h6>
-                      <p className="display-6 text-dark fw-bold mt-2 mb-0">112</p>
-                      <small className="text-muted">All-in-one Emergency</small>
+                      <p className="display-6 text-white fw-bold mt-2 mb-0">112</p>
+                      <small className="text-white-50">All-in-one Emergency</small>
                     </div>
                   </Col>
                   <Col md={3} sm={6}>
-                    <div style={{ background: '#eff6ff', border: '1px solid #dbeafe', borderRadius: '0.5rem', padding: '1.5rem' }} className="text-center h-100">
+                    <div style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '0.5rem', padding: '1.5rem' }} className="text-center h-100">
                       <h6 className="text-primary fw-bold">Police</h6>
-                      <p className="display-6 text-dark fw-bold mt-2 mb-0">100</p>
-                      <small className="text-muted">Police Assistance</small>
+                      <p className="display-6 text-white fw-bold mt-2 mb-0">100</p>
+                      <small className="text-white-50">Police Assistance</small>
                     </div>
                   </Col>
                   <Col md={3} sm={6}>
-                    <div style={{ background: '#fff7ed', border: '1px solid #ffedd5', borderRadius: '0.5rem', padding: '1.5rem' }} className="text-center h-100">
-                      <h6 className="text-warning fw-bold" style={{ color: '#ea580c' }}>Fire</h6>
-                      <p className="display-6 text-dark fw-bold mt-2 mb-0">101</p>
-                      <small className="text-muted">Fire Brigade</small>
+                    <div style={{ background: 'rgba(249, 115, 22, 0.1)', border: '1px solid rgba(249, 115, 22, 0.2)', borderRadius: '0.5rem', padding: '1.5rem' }} className="text-center h-100">
+                      <h6 className="fw-bold" style={{ color: '#f97316' }}>Fire</h6>
+                      <p className="display-6 text-white fw-bold mt-2 mb-0">101</p>
+                      <small className="text-white-50">Fire Brigade</small>
                     </div>
                   </Col>
                   <Col md={3} sm={6}>
-                    <div style={{ background: '#f0fdf4', border: '1px solid #dcfce7', borderRadius: '0.5rem', padding: '1.5rem' }} className="text-center h-100">
+                    <div style={{ background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.2)', borderRadius: '0.5rem', padding: '1.5rem' }} className="text-center h-100">
                       <h6 className="text-success fw-bold">Ambulance</h6>
-                      <p className="display-6 text-dark fw-bold mt-2 mb-0">102</p>
-                      <small className="text-muted">Medical Emergency</small>
+                      <p className="display-6 text-white fw-bold mt-2 mb-0">102</p>
+                      <small className="text-white-50">Medical Emergency</small>
                     </div>
                   </Col>
                 </Row>
@@ -202,32 +206,32 @@ export default function FirstAidPage() {
 
           {/* First Aid Procedures */}
           <Col lg={12}>
-            <Card style={{ background: '#ffffff', border: '1px solid #fecaca', borderRadius: '1rem', boxShadow: '0 4px 6px -1px rgba(220, 38, 38, 0.1)' }} className="text-dark">
+            <Card style={{ background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255, 255, 255, 0.1)', borderRadius: '1rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.2)' }} className="text-white">
               <Card.Body>
                 <h5 className="fw-bold mb-2" style={headerGradient}>Common First Aid Procedures</h5>
-                <p className="text-muted mb-4">Step-by-step guides for handling common injuries and conditions</p>
+                <p className="text-white-50 mb-4">Step-by-step guides for handling common injuries and conditions</p>
 
                 <Accordion className="accordion-flush">
                   {firstAidGuides.map((guide, index) => (
-                    <Accordion.Item eventKey={guide.id} key={guide.id} className="mb-3 border rounded overflow-hidden">
+                    <Accordion.Item eventKey={guide.id} key={guide.id} className="mb-3 rounded overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.1)', background: 'transparent' }}>
                       <Accordion.Header>
                         <div>
-                          <h6 className="fw-bold text-dark mb-1">{guide.title}</h6>
-                          <small className="text-muted">{guide.description}</small>
+                          <h6 className="fw-bold text-white mb-1">{guide.title}</h6>
+                          <small className="text-white-50">{guide.description}</small>
                         </div>
                       </Accordion.Header>
-                      <Accordion.Body className="bg-light">
+                      <Accordion.Body style={{ background: 'rgba(0,0,0,0.2)', color: '#cbd5e1' }}>
                         <div className="mb-3">
                           <h6 className="fw-bold text-danger mb-2">Steps</h6>
                           <ol style={{ paddingLeft: '1.5rem' }}>
                             {guide.steps.map((step, idx) => (
-                              <li key={idx} className="text-dark mb-2">{step}</li>
+                              <li key={idx} className="mb-2">{step}</li>
                             ))}
                           </ol>
                         </div>
-                        <div style={{ background: '#fffbeb', border: '1px solid #fef3c7', borderRadius: '0.5rem', padding: '1rem' }}>
-                          <h6 className="fw-bold text-warning mb-2" style={{ color: '#d97706' }}>Warning</h6>
-                          <p className="text-muted mb-0">{guide.warning}</p>
+                        <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '0.5rem', padding: '1rem' }}>
+                          <h6 className="fw-bold text-warning mb-2">Warning</h6>
+                          <p className="text-white-50 mb-0">{guide.warning}</p>
                         </div>
                       </Accordion.Body>
                     </Accordion.Item>
@@ -239,13 +243,28 @@ export default function FirstAidPage() {
         </Row>
       </Container>
       <style jsx global>{`
+        .accordion-button {
+          background-color: rgba(255, 255, 255, 0.05);
+          color: white;
+        }
         .accordion-button:not(.collapsed) {
-          background-color: rgba(220, 38, 38, 0.05);
-          color: #dc2626;
+          background-color: rgba(239, 68, 68, 0.1);
+          color: #ef4444;
+          box-shadow: none;
         }
         .accordion-button:focus {
           box-shadow: none;
-          border-color: rgba(220, 38, 38, 0.1);
+          border-color: rgba(255, 255, 255, 0.1);
+        }
+        .accordion-button::after {
+            filter: invert(1);
+        }
+        .accordion-button:not(.collapsed)::after {
+            filter: invert(1) sepia(1) saturate(5) hue-rotate(-50deg);
+        }
+        /* Fix search input placeholder color */
+        ::placeholder {
+            color: rgba(255, 255, 255, 0.5) !important;
         }
       `}</style>
     </div>

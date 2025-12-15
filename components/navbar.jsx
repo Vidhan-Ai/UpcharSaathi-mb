@@ -26,16 +26,21 @@ export default function NavbarComponent() {
   }, [navRef])
 
   // Navigation links array for reuse
-  const navigationLinks = [
+  // Navigation links array for reuse
+  // If NOT authenticated, show simplified menu
+  const navigationLinks = isAuthenticated ? [
     { href: '/', label: 'Home' },
     { href: '/find-care', label: 'Find Care' },
     { href: '/first-aid', label: 'First Aid' },
-
     { href: '/mental-health', label: 'Mental Health' },
+    { href: '/fact-check', label: 'Fact Check' },
     { href: '/health-scanner', label: 'Health Scanner' },
     { href: '/about-us', label: 'About Us' },
     { href: '/contact-us', label: 'Contact Us' }
-  ]
+  ] : [
+    { href: '/about-us', label: 'About Us' },
+    { href: '/contact-us', label: 'Contact Us' }
+  ];
 
   // Get user initials for avatar fallback
   const getUserInitials = () => {
@@ -62,20 +67,20 @@ export default function NavbarComponent() {
   }
 
   const navbarStyle = {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    backdropFilter: 'blur(10px)',
+    backgroundColor: 'rgba(15, 23, 42, 0.7)', // Dark glass
+    backdropFilter: 'blur(16px)',
     borderRadius: '1rem',
-    border: '1px solid rgba(220, 38, 38, 0.1)',
-    boxShadow: '0 4px 20px rgba(220, 38, 38, 0.08)',
+    border: '1px solid rgba(255, 255, 255, 0.05)',
+    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
     padding: '0.5rem 1rem'
   }
 
   const navLinkStyle = (isActive) => ({
-    color: isActive ? '#dc2626' : '#6c757d',
+    color: isActive ? '#ef4444' : '#94a3b8', // Light Red / Slate Gray
     fontWeight: isActive ? '600' : '500',
     fontSize: '0.875rem',
     paddingBottom: '0.5rem',
-    borderBottom: isActive ? '2px solid #dc2626' : '2px solid transparent',
+    borderBottom: isActive ? '2px solid #ef4444' : '2px solid transparent',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     marginRight: '2rem',
     position: 'relative',
@@ -86,7 +91,7 @@ export default function NavbarComponent() {
   const brandStyle = {
     fontSize: '1.25rem',
     fontWeight: 'bold',
-    background: 'linear-gradient(to right, #dc2626, #fb7185)',
+    background: 'linear-gradient(to right, #ef4444, #f87171)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
     backgroundClip: 'text',
@@ -111,10 +116,10 @@ export default function NavbarComponent() {
   }
 
   const dropdownMenuStyle = {
-    backgroundColor: '#ffffff',
-    border: '1px solid #fecaca',
+    backgroundColor: '#1e293b',
+    border: '1px solid #334155',
     borderRadius: '0.75rem',
-    boxShadow: '0 10px 40px rgba(220, 38, 38, 0.1)',
+    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
     marginTop: '0.5rem'
   }
 
@@ -125,7 +130,7 @@ export default function NavbarComponent() {
           expand="sm"
           expanded={expanded}
           style={navbarStyle}
-          className="navbar-light"
+          className="navbar-dark"
         >
           <Container fluid className="px-2">
             {/* Logo */}
@@ -157,6 +162,7 @@ export default function NavbarComponent() {
                     'First Aid': 'FA',
 
                     'Mental Health': 'MH',
+                    'Fact Check': 'FC',
                     'About Us': 'AU',
                     'Contact Us': 'CU'
                   };
@@ -236,43 +242,43 @@ export default function NavbarComponent() {
                       >
                         {/* User Info */}
                         <div className="px-3 py-2">
-                          <p className="mb-0 text-dark fw-medium" style={{ fontSize: '0.875rem' }}>
+                          <p className="mb-0 text-white fw-medium" style={{ fontSize: '0.875rem' }}>
                             {user?.name || 'User'}
                           </p>
-                          <p className="mb-0 text-muted" style={{ fontSize: '0.75rem' }}>
+                          <p className="mb-0 text-white-50" style={{ fontSize: '0.75rem' }}>
                             {user?.email || 'user@example.com'}
                           </p>
                         </div>
 
-                        <Dropdown.Divider className="my-2" style={{ borderColor: '#fecaca' }} />
+                        <Dropdown.Divider className="my-2" style={{ borderColor: '#334155' }} />
 
                         {/* Menu Items */}
-                        <Dropdown.Item as={Link} href="/profile?tab=personal" className="text-dark dropdown-item-animated" onClick={() => setExpanded(false)}>
+                        <Dropdown.Item as={Link} href="/profile?tab=personal" className="text-light dropdown-item-animated" onClick={() => setExpanded(false)}>
                           <User size={16} className="me-2" style={{ display: 'inline', color: '#fb7185' }} />
                           My Profile
                         </Dropdown.Item>
 
-                        <Dropdown.Item as={Link} href="/profile?tab=orders" className="text-dark dropdown-item-animated" onClick={() => setExpanded(false)}>
+                        <Dropdown.Item as={Link} href="/profile?tab=orders" className="text-light dropdown-item-animated" onClick={() => setExpanded(false)}>
                           <ShoppingBag size={16} className="me-2" style={{ display: 'inline', color: '#f43f5e' }} />
                           Order History
                         </Dropdown.Item>
 
-                        <Dropdown.Item as={Link} href="/profile?tab=medical" className="text-dark dropdown-item-animated" onClick={() => setExpanded(false)}>
+                        <Dropdown.Item as={Link} href="/profile?tab=medical" className="text-light dropdown-item-animated" onClick={() => setExpanded(false)}>
                           <FileText size={16} className="me-2" style={{ display: 'inline', color: '#ff6b6b' }} />
                           Medical Records
                         </Dropdown.Item>
 
-                        <Dropdown.Item as={Link} href="/profile?tab=appointments" className="text-dark dropdown-item-animated" onClick={() => setExpanded(false)}>
-                          <Calendar size={16} className="me-2" style={{ display: 'inline', color: '#dc2626' }} />
+                        <Dropdown.Item as={Link} href="/profile?tab=appointments" className="text-light dropdown-item-animated" onClick={() => setExpanded(false)}>
+                          <Calendar size={16} className="me-2" style={{ display: 'inline', color: '#ef4444' }} />
                           My Appointments
                         </Dropdown.Item>
 
-                        <Dropdown.Item as={Link} href="/profile?tab=settings" className="text-dark dropdown-item-animated" onClick={() => setExpanded(false)}>
-                          <Settings size={16} className="me-2" style={{ display: 'inline', color: '#6c757d' }} />
+                        <Dropdown.Item as={Link} href="/profile?tab=settings" className="text-light dropdown-item-animated" onClick={() => setExpanded(false)}>
+                          <Settings size={16} className="me-2" style={{ display: 'inline', color: '#94a3b8' }} />
                           Account Settings
                         </Dropdown.Item>
 
-                        <Dropdown.Divider className="my-2" style={{ borderColor: '#fecaca' }} />
+                        <Dropdown.Divider className="my-2" style={{ borderColor: '#334155' }} />
 
                         {/* Sign Out */}
                         <Dropdown.Item
@@ -294,7 +300,7 @@ export default function NavbarComponent() {
                       <Button
                         className="btn-sm auth-button-animated"
                         style={{
-                          background: 'linear-gradient(to right, #dc2626, #fb7185)',
+                          background: 'linear-gradient(to right, #ef4444, #f87171)',
                           border: 'none',
                           color: '#fff',
                           transition: 'transform 0.3s ease, box-shadow 0.3s ease'
@@ -310,8 +316,8 @@ export default function NavbarComponent() {
                         variant="outline-danger"
                         className="btn-sm auth-button-animated"
                         style={{
-                          borderColor: '#dc2626',
-                          color: '#dc2626',
+                          borderColor: '#ef4444',
+                          color: '#ef4444',
                           transition: 'transform 0.3s ease, box-shadow 0.3s ease'
                         }}
                         onClick={() => setExpanded(false)}
@@ -330,7 +336,6 @@ export default function NavbarComponent() {
       {/* Spacer to prevent content from going under fixed navbar */}
       <div style={{ height: '80px' }} />
 
-      {/* CSS Animations */}
       <style jsx global>{`
         .navbar-link-animated {
           position: relative;
@@ -343,7 +348,7 @@ export default function NavbarComponent() {
           left: 0;
           width: 0;
           height: 2px;
-          background: linear-gradient(to right, #dc2626, #fb7185);
+          background: linear-gradient(to right, #ef4444, #f87171);
           transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
@@ -352,7 +357,7 @@ export default function NavbarComponent() {
         }
         
         .navbar-link-animated:hover {
-          color: #dc2626 !important;
+          color: #ef4444 !important;
         }
 
         .navbar-brand-hover:hover {
@@ -385,18 +390,18 @@ export default function NavbarComponent() {
         }
 
         .dropdown-item-animated:hover {
-          background-color: rgba(220, 38, 38, 0.05) !important;
+          background-color: rgba(239, 68, 68, 0.1) !important;
+          color: #fff !important;
           transform: translateX(4px);
         }
 
-        .auth-button-animated:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        .mobile-nav-link {
+          color: #94a3b8 !important; 
         }
 
         .mobile-nav-link:hover {
-          background-color: rgba(220, 38, 38, 0.05) !important;
-          color: #dc2626 !important;
+          background-color: rgba(239, 68, 68, 0.1) !important;
+          color: #ef4444 !important;
         }
       `}</style>
     </>

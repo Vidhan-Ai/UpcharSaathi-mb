@@ -22,6 +22,7 @@
     "@capacitor/core": "^7.4.4",
     "@capacitor/geolocation": "^7.1.6",
     "@capacitor/ios": "^7.4.4",
+    "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.6.0",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@stackframe/stack": "^2.8.54",
@@ -33,6 +34,7 @@
     "express": "^5.1.0",
     "framer-motion": "^11.0.0",
     "fuse.js": "^7.1.0",
+    "google-auth-library": "^10.5.0",
     "ioredis": "^5.8.2",
     "jose": "^6.1.2",
     "leaflet": "^1.9.4",
@@ -49,6 +51,7 @@
     "recharts": "^3.5.1",
     "rss-parser": "^3.13.0",
     "tesseract.js": "^6.0.1",
+    "youtube-transcript": "^1.2.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {

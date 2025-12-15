@@ -42,20 +42,13 @@ export default function Signup() {
             <Container>
                 <Row className="justify-content-center">
                     <Col md={8} lg={6}>
-                        <div className="animate-fade-in" style={{
-                            background: '#ffffff',
-                            border: '1px solid #fecaca',
-                            borderRadius: '1rem',
-                            padding: '2rem',
-                            boxShadow: '0 10px 30px rgba(220, 38, 38, 0.1)'
-                        }}>
-                            <div className="d-flex justify-content-center mb-4">
-                                <div className="bg-danger bg-opacity-10 p-3 rounded-circle">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /><line x1="23" y1="11" x2="17" y2="11" /></svg>
-                                </div>
-                            </div>
-
+                        <div className="animate-fade-in">
                             <div className="stack-auth-wrapper">
+                                <div className="d-flex justify-content-center mb-4">
+                                    <div className="d-inline-flex justify-content-center align-items-center p-3 rounded-circle" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="8.5" cy="7" r="4" /><line x1="20" y1="8" x2="20" y2="14" /><line x1="23" y1="11" x2="17" y2="11" /></svg>
+                                    </div>
+                                </div>
                                 <SignUp fullPage={false} />
                             </div>
                         </div>

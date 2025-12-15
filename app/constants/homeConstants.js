@@ -108,7 +108,8 @@ export const styles = {
         backgroundClip: 'text'
     },
     cardStyle: {
-        background: '#ffffff',
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(12px)',
         border: '1px solid #dc2626',
         borderRadius: '1rem',
         minHeight: '380px',

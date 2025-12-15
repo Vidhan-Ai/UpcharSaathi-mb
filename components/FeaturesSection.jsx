@@ -11,7 +11,7 @@ export default function FeaturesSection() {
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            style={{ background: '#ffffff', paddingTop: '5rem', paddingBottom: '5rem' }}
+            style={{ paddingTop: '5rem', paddingBottom: '5rem' }}
         >
             <Container>
                 <motion.div

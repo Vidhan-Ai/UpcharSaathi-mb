@@ -6,7 +6,7 @@ import { Search, MapPin, Phone, Stethoscope, Droplet, Activity, Star } from 'luc
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import GetDirectionsButton from '@/components/GetDirectionsButton';
-import { Geolocation } from '@capacitor/geolocation';
+
 import { useSearchParams } from 'next/navigation';
 
 // Dynamically import map to avoid SSR issues
@@ -87,28 +87,43 @@ export default function FindCareClient() {
         setLoading(true);
         setError(null);
 
+        let latitude, longitude;
+
         try {
+            // 1. Try Accurate Native Geolocation first
             try {
-                const permissionStatus = await Geolocation.checkPermissions();
-                if (permissionStatus.location !== 'granted') {
-                    const requestStatus = await Geolocation.requestPermissions();
-                    if (requestStatus.location !== 'granted') {
-                        throw new Error('Location permission denied. Please enable it in settings.');
+                const position = await new Promise((resolve, reject) => {
+                    if (!navigator.geolocation) {
+                        reject(new Error('Geolocation is not supported by your browser.'));
+                        return;
                     }
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    });
+                });
+                latitude = position.coords.latitude;
+                longitude = position.coords.longitude;
+            } catch (geoError) {
+                console.warn('GPS failed, attempting IP-based fallback...', geoError);
+
+                // 2. Fallback to IP Geolocation
+                // Using ipapi.co as a reliable HTTPS fallback
+                const fallbackRes = await fetch('https://ipapi.co/json/');
+                if (!fallbackRes.ok) {
+                    throw geoError; // If fallback fails, throw original error
                 }
-            } catch (permErr) {
-                if (permErr.message !== 'Not implemented on web.') {
-                    console.warn("Permission request failed or not needed:", permErr);
+                const fallbackData = await fallbackRes.json();
+
+                if (fallbackData.latitude && fallbackData.longitude) {
+                    latitude = fallbackData.latitude;
+                    longitude = fallbackData.longitude;
+                } else {
+                    throw geoError;
                 }
             }
 
-            const position = await Geolocation.getCurrentPosition({
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-            });
-
-            const { latitude, longitude } = position.coords;
             setCenter({ lat: latitude, lon: longitude });
 
             const endpoint = activeTab === 'doctors'
@@ -133,7 +148,13 @@ export default function FindCareClient() {
         } catch (err) {
             console.error('Geolocation error:', err);
             let errorMessage = 'Unable to retrieve your location.';
-            if (err.message) errorMessage = err.message;
+
+            // Handle GeolocationPositionError properties specifically
+            if (err.code === 1) errorMessage = 'Location permission denied. Please check your browser settings or try again.';
+            else if (err.code === 2) errorMessage = 'Location unavailable. Please check your GPS.';
+            else if (err.code === 3) errorMessage = 'Location request timed out.';
+            else if (err.message) errorMessage = err.message;
+
             setError(errorMessage);
         } finally {
             setLoading(false);
@@ -141,7 +162,7 @@ export default function FindCareClient() {
     };
 
     return (
-        <div className="min-vh-100 position-relative overflow-hidden">
+        <div className="min-vh-100 position-relative overflow-hidden" style={{ background: '#0f172a' }}>
             <Container className="position-relative py-5" style={{ zIndex: 1 }}>
                 {/* Header Section */}
                 <motion.div
@@ -149,13 +170,13 @@ export default function FindCareClient() {
                     animate={{ opacity: 1, y: 0 }}
                     className="text-center mb-5"
                 >
-                    <div className="d-inline-flex align-items-center justify-content-center p-3 rounded-circle mb-3 shadow-sm bg-white text-danger">
+                    <div className="d-inline-flex align-items-center justify-content-center p-3 rounded-circle mb-3 shadow-sm text-danger" style={{ background: 'rgba(239, 68, 68, 0.2)' }}>
                         <Activity size={32} />
                     </div>
-                    <h1 className="display-4 fw-bold mb-3 text-dark">
+                    <h1 className="display-4 fw-bold mb-3 text-white">
                         Find <span className="text-danger">Medical Care</span>
                     </h1>
-                    <p className="lead text-muted mx-auto" style={{ maxWidth: '600px' }}>
+                    <p className="lead text-white-50 mx-auto" style={{ maxWidth: '600px' }}>
                         Connect with top-rated doctors, hospitals, and blood banks in your area instantly.
                     </p>
                 </motion.div>
@@ -166,9 +187,9 @@ export default function FindCareClient() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                 >
-                    <Card className="border-0 shadow-lg mb-5 overflow-visible" style={{ borderRadius: '24px', background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(20px)' }}>
+                    <Card className="border-0 shadow-lg mb-5 overflow-visible" style={{ borderRadius: '24px', background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' }}>
                         <Card.Body className="p-2">
-                            <Nav variant="pills" className="nav-justified bg-light rounded-4 p-1 mb-3" activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
+                            <Nav variant="pills" className="nav-justified bg-white bg-opacity-10 rounded-4 p-1 mb-3" activeKey={activeTab} onSelect={(k) => setActiveTab(k)}>
                                 <Nav.Item>
                                     <Nav.Link eventKey="doctors" className="rounded-4 py-3 d-flex align-items-center justify-content-center gap-2 transition-all">
                                         <Stethoscope size={20} />
@@ -187,14 +208,14 @@ export default function FindCareClient() {
                                 <Row className="g-3">
                                     <Col md={10}>
                                         <div className="position-relative group">
-                                            <Search className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" size={20} />
+                                            <Search className="position-absolute top-50 start-0 translate-middle-y ms-3 text-white-50" size={20} />
                                             <Form.Control
                                                 type="text"
                                                 placeholder={activeTab === 'doctors' ? "Search for doctors, specialties, or hospitals..." : "Search for blood banks by location..."}
                                                 value={query}
                                                 onChange={(e) => setQuery(e.target.value)}
-                                                className="ps-5 py-3 border-0 bg-light shadow-sm"
-                                                style={{ borderRadius: '16px', fontSize: '1.05rem' }}
+                                                className="ps-5 py-3 border border-secondary shadow-none text-white"
+                                                style={{ borderRadius: '16px', fontSize: '1.05rem', background: 'rgba(0,0,0,0.2)' }}
                                             />
                                         </div>
                                     </Col>
@@ -246,7 +267,7 @@ export default function FindCareClient() {
                                             exit={{ opacity: 0, scale: 0.95 }}
                                             transition={{ delay: index * 0.05 }}
                                         >
-                                            <Card className="border-0 shadow-sm hover-card transition-all overflow-hidden" style={{ borderRadius: '20px' }}>
+                                            <Card className="border-0 shadow-sm hover-card transition-all overflow-hidden" style={{ borderRadius: '20px', background: 'rgba(30, 41, 59, 0.6)', border: '1px solid rgba(255,255,255,0.05)' }}>
                                                 <Card.Body className="p-4">
                                                     <div className="d-flex justify-content-between align-items-start mb-3">
                                                         <div className="d-flex gap-3">
@@ -255,15 +276,15 @@ export default function FindCareClient() {
                                                                 {activeTab === 'doctors' ? <Stethoscope size={28} className="text-primary" /> : <Droplet size={28} className="text-danger" />}
                                                             </div>
                                                             <div>
-                                                                <h5 className="fw-bold mb-1 text-dark">{item.name}</h5>
-                                                                <div className="d-flex align-items-center gap-2 text-muted small">
+                                                                <h5 className="fw-bold mb-1 text-white">{item.name}</h5>
+                                                                <div className="d-flex align-items-center gap-2 text-white-50 small">
                                                                     <span className="text-uppercase fw-semibold" style={{ fontSize: '0.75rem', letterSpacing: '0.5px' }}>
                                                                         {activeTab === 'doctors'
                                                                             ? (item.specialty ? item.specialty.replace(/_/g, ' ') : item.type)
                                                                             : 'Blood Bank'
                                                                         }
                                                                     </span>
-                                                                    <span className="text-muted">•</span>
+                                                                    <span className="text-white-50">•</span>
                                                                     <span className="d-flex align-items-center gap-1">
                                                                         <Star size={12} className="text-warning fill-warning" />
                                                                         4.8 (120+)
@@ -278,19 +299,19 @@ export default function FindCareClient() {
                                                         </Badge>
                                                     </div>
 
-                                                    <div className="bg-light rounded-4 p-3 mb-3">
+                                                    <div className="bg-white bg-opacity-10 rounded-4 p-3 mb-3">
                                                         <div className="d-flex align-items-start gap-2 mb-2">
                                                             <MapPin size={16} className="text-danger mt-1 flex-shrink-0" />
-                                                            <span className="text-muted small fw-medium">
+                                                            <span className="text-white-50 small fw-medium">
                                                                 {item.address || 'Address not available'}
                                                             </span>
                                                         </div>
                                                         {item.distance && (
                                                             <div className="d-flex align-items-center gap-2 ms-4">
-                                                                <Badge bg="white" text="dark" className="border shadow-sm rounded-pill fw-normal">
+                                                                <Badge className="border shadow-sm rounded-pill fw-normal bg-white bg-opacity-10 text-white">
                                                                     {item.distance} km away
                                                                 </Badge>
-                                                                <Badge bg="white" text="success" className="border shadow-sm rounded-pill fw-normal">
+                                                                <Badge className="border shadow-sm rounded-pill fw-normal bg-white bg-opacity-10 text-success">
                                                                     ~15 min drive
                                                                 </Badge>
                                                             </div>
@@ -299,15 +320,15 @@ export default function FindCareClient() {
 
                                                     {activeTab === 'blood-banks' && item.availability && (
                                                         <div className="mb-4">
-                                                            <h6 className="small fw-bold text-muted mb-2 text-uppercase" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>Blood Availability</h6>
+                                                            <h6 className="small fw-bold text-white-50 mb-2 text-uppercase" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>Blood Availability</h6>
                                                             <div className="d-flex flex-wrap gap-2">
                                                                 {Object.entries(item.availability).slice(0, 5).map(([type, units]) => (
-                                                                    <div key={type} className="d-flex align-items-center px-2 py-1 rounded-3 border bg-white" style={{ fontSize: '0.8rem' }}>
-                                                                        <span className="fw-bold me-2 text-dark">{type}</span>
+                                                                    <div key={type} className="d-flex align-items-center px-2 py-1 rounded-3 border bg-white bg-opacity-10 border-secondary" style={{ fontSize: '0.8rem' }}>
+                                                                        <span className="fw-bold me-2 text-white">{type}</span>
                                                                         <span className={`fw-medium ${units > 10 ? 'text-success' : 'text-warning'}`}>{units}u</span>
                                                                     </div>
                                                                 ))}
-                                                                <Badge bg="light" text="dark" className="fw-normal border">+3</Badge>
+                                                                <Badge bg="dark" text="white" className="fw-normal border border-secondary">+3</Badge>
                                                             </div>
                                                         </div>
                                                     )}
@@ -320,7 +341,7 @@ export default function FindCareClient() {
                                                             className="flex-grow-1 py-2 rounded-3 fw-semibold shadow-sm"
                                                         />
                                                         {item.phone && (
-                                                            <a href={`tel:${item.phone}`} className="btn btn-outline-secondary flex-grow-1 rounded-3 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2 hover-bg-light">
+                                                            <a href={`tel:${item.phone}`} className="btn btn-outline-light flex-grow-1 rounded-3 py-2 fw-semibold d-flex align-items-center justify-content-center gap-2 hover-bg-light">
                                                                 <Phone size={16} /> Call
                                                             </a>
                                                         )}
@@ -336,11 +357,11 @@ export default function FindCareClient() {
                                             animate={{ opacity: 1 }}
                                             className="text-center py-5"
                                         >
-                                            <div className="mb-4 p-4 rounded-circle bg-white shadow-sm d-inline-block">
-                                                <Search size={48} className="text-muted opacity-50" />
+                                            <div className="mb-4 p-4 rounded-circle bg-white bg-opacity-10 shadow-sm d-inline-block">
+                                                <Search size={48} className="text-white-50 opacity-50" />
                                             </div>
-                                            <h4 className="text-dark fw-bold">Searching nearby...</h4>
-                                            <p className="text-muted">Locating the best care options in your vicinity.</p>
+                                            <h4 className="text-white fw-bold">Searching nearby...</h4>
+                                            <p className="text-white-50">Locating the best care options in your vicinity.</p>
                                         </motion.div>
                                     )
                                 )}
@@ -352,7 +373,7 @@ export default function FindCareClient() {
                     <Col lg={6} className="order-1 order-lg-2">
                         <div className="sticky-top" style={{ top: '20px', height: 'calc(100vh - 140px)', minHeight: '500px' }}>
                             <Card className="h-100 border-0 shadow-lg overflow-hidden position-relative" style={{ borderRadius: '24px' }}>
-                                <div className="position-absolute top-0 start-0 w-100 h-100 bg-light d-flex align-items-center justify-content-center">
+                                <div className="position-absolute top-0 start-0 w-100 h-100 bg-dark d-flex align-items-center justify-content-center">
                                     <CareMap doctors={results} center={center} />
                                 </div>
                                 {/* Map Overlay Gradient */}
@@ -365,17 +386,23 @@ export default function FindCareClient() {
 
             <style jsx global>{`
                 .nav-pills .nav-link {
-                    color: #64748b;
+                    color: rgba(255, 255, 255, 0.5);
                     transition: all 0.3s ease;
                 }
+                .nav-pills .nav-link:hover {
+                    color: rgba(255, 255, 255, 0.8);
+                    background-color: rgba(255, 255, 255, 0.05);
+                }
                 .nav-pills .nav-link.active {
-                    background-color: #fff !important;
-                    color: #dc2626 !important;
+                    background-color: rgba(255, 255, 255, 0.1) !important;
+                    color: #fff !important;
                     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                    border: 1px solid rgba(239, 68, 68, 0.2);
                 }
                 .hover-card:hover {
                     transform: translateY(-4px);
-                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2) !important;
+                    background: rgba(30, 41, 59, 0.8) !important;
                 }
                 .hover-lift:hover {
                     transform: translateY(-2px);
@@ -383,13 +410,15 @@ export default function FindCareClient() {
                 }
                 .form-control:focus {
                     box-shadow: none;
-                    border: 2px solid #fecaca !important;
+                    border-color: #ef4444 !important;
                 }
-                .hover-bg-light-danger:hover {
-                    background-color: #fee2e2 !important;
+                .form-control::placeholder {
+                    color: rgba(255, 255, 255, 0.4);
                 }
                 .hover-bg-light:hover {
-                    background-color: #f8f9fa !important;
+                    background-color: rgba(255, 255, 255, 0.1) !important;
+                    color: #fff !important;
+                    border-color: rgba(255,255,255,0.2) !important;
                 }
                 /* Custom Scrollbar for results */
                 ::-webkit-scrollbar {
@@ -399,11 +428,11 @@ export default function FindCareClient() {
                     background: transparent;
                 }
                 ::-webkit-scrollbar-thumb {
-                    background: #cbd5e1;
+                    background: #475569;
                     border-radius: 3px;
                 }
                 ::-webkit-scrollbar-thumb:hover {
-                    background: #94a3b8;
+                    background: #64748b;
                 }
             `}</style>
         </div>

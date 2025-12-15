@@ -22,7 +22,7 @@ const staggerContainer = {
 
 export default function AboutUsClient() {
     return (
-        <div className="min-vh-100 py-5" style={{ background: 'linear-gradient(to right, #fef2f2, #ffe4e6, #fef2f2)' }}>
+        <div className="min-vh-100 py-5" style={{ background: '#0f172a' }}>
             <Container>
                 {/* Hero Section */}
                 <motion.div
@@ -32,7 +32,7 @@ export default function AboutUsClient() {
                     transition={{ duration: 0.6 }}
                     className="text-center mb-5"
                 >
-                    <div className="d-inline-flex align-items-center justify-content-center p-3 rounded-circle mb-4 shadow-sm" style={{ background: 'white' }}>
+                    <div className="d-inline-flex align-items-center justify-content-center p-3 rounded-circle mb-4 shadow-sm" style={{ background: 'rgba(239, 68, 68, 0.2)' }}>
                         <Heart size={40} className="text-danger" />
                     </div>
                     <h1 className="display-4 fw-bold mb-4" style={{
@@ -42,7 +42,7 @@ export default function AboutUsClient() {
                     }}>
                         Revolutionizing Healthcare Access
                     </h1>
-                    <p className="lead text-muted mx-auto" style={{ maxWidth: '700px' }}>
+                    <p className="lead text-white-50 mx-auto" style={{ maxWidth: '700px' }}>
                         UpcharSaathi combines advanced AI technology with compassionate care to bring reliable medical guidance to your fingertips.
                     </p>
                 </motion.div>
@@ -82,13 +82,13 @@ export default function AboutUsClient() {
                         ].map((item, index) => (
                             <Col md={6} lg={3} key={index}>
                                 <motion.div variants={fadeIn} className="h-100">
-                                    <Card className="h-100 border-0 shadow-sm hover-shadow transition-all" style={{ borderRadius: '1rem' }}>
+                                    <Card className="h-100 border-0 shadow-sm hover-shadow transition-all" style={{ borderRadius: '1rem', background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' }}>
                                         <Card.Body className="p-4 text-center">
                                             <div className={`d-inline-flex p-3 rounded-circle bg-${item.color} bg-opacity-10 text-${item.color} mb-3`}>
                                                 <item.icon size={24} />
                                             </div>
-                                            <h5 className="fw-bold mb-3">{item.title}</h5>
-                                            <p className="text-muted small mb-0">
+                                            <h5 className="fw-bold mb-3 text-white">{item.title}</h5>
+                                            <p className="text-white-50 small mb-0">
                                                 {item.content}
                                             </p>
                                         </Card.Body>
@@ -130,32 +130,32 @@ export default function AboutUsClient() {
                 {/* Story Section */}
                 <Row className="justify-content-center">
                     <Col lg={10}>
-                        <Card className="border-0 shadow-lg overflow-hidden" style={{ borderRadius: '1.5rem' }}>
+                        <Card className="border-0 shadow-lg overflow-hidden" style={{ borderRadius: '1.5rem', background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' }}>
                             <Row className="g-0">
-                                <Col md={5} className="bg-light d-flex align-items-center justify-content-center p-5 text-center">
+                                <Col md={5} className="d-flex align-items-center justify-content-center p-5 text-center" style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
                                     <div>
                                         <Award size={64} className="text-danger mb-3" />
-                                        <h3 className="fw-bold text-dark">Why Choose Us?</h3>
-                                        <p className="text-muted">Because your health deserves the best technology and care.</p>
+                                        <h3 className="fw-bold text-white">Why Choose Us?</h3>
+                                        <p className="text-white-50">Because your health deserves the best technology and care.</p>
                                     </div>
                                 </Col>
                                 <Col md={7} className="p-5">
-                                    <h4 className="fw-bold mb-4">Our Story</h4>
-                                    <p className="text-muted mb-4">
+                                    <h4 className="fw-bold mb-4 text-white">Our Story</h4>
+                                    <p className="text-white-50 mb-4">
                                         UpcharSaathi was born from a simple idea: that quality healthcare advice should be accessible to everyone, regardless of their location or time of day.
                                     </p>
-                                    <p className="text-muted mb-4">
+                                    <p className="text-white-50 mb-4">
                                         We recognized that in emergency situations or for general health queries, people often struggle to find reliable information. By bridging the gap between medical expertise and artificial intelligence, we created a platform that empowers you to make informed decisions about your health.
                                     </p>
                                     <div className="d-flex align-items-center gap-3">
                                         <div className="d-flex align-items-center gap-2">
                                             <Activity className="text-danger" size={20} />
-                                            <span className="fw-medium">Real-time Analysis</span>
+                                            <span className="fw-medium text-white">Real-time Analysis</span>
                                         </div>
-                                        <div className="vr" />
+                                        <div className="vr bg-white mx-2" />
                                         <div className="d-flex align-items-center gap-2">
                                             <Stethoscope className="text-danger" size={20} />
-                                            <span className="fw-medium">Doctor Verified</span>
+                                            <span className="fw-medium text-white">Doctor Verified</span>
                                         </div>
                                     </div>
                                 </Col>
@@ -168,7 +168,7 @@ export default function AboutUsClient() {
             <style jsx global>{`
                 .hover-shadow:hover {
                     transform: translateY(-5px);
-                    box-shadow: 0 1rem 3rem rgba(0,0,0,.175)!important;
+                    box-shadow: 0 1rem 3rem rgba(0,0,0,.3)!important;
                 }
             `}</style>
         </div>

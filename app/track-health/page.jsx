@@ -15,7 +15,8 @@ import {
     ArrowUpRight,
     Calendar,
     AlertTriangle,
-    LogOut
+    LogOut,
+    MapPin
 } from 'lucide-react'
 import {
     AreaChart,
@@ -32,10 +33,8 @@ import {
     Bar,
     Legend
 } from 'recharts'
-import { Capacitor } from '@capacitor/core'
-import { HealthConnect } from 'capacitor-health-connect'
 import { useUser } from '@stackframe/stack'
-import { getFitbitData, disconnectFitbit } from '../actions/fitbit'
+// import { getFitbitData, disconnectFitbit } from '../actions/fitbit' // Removed
 
 // --- Mock Data (Fallback) ---
 const MOCK_WEEKLY_STEPS_DATA = [
@@ -58,22 +57,22 @@ const MOCK_ACTIVITY_DISTRIBUTION = [
 // --- Styles ---
 const styles = {
     gradientText: {
-        background: 'linear-gradient(135deg, #2563eb 0%, #db2777 100%)',
+        background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
     },
     glassCard: {
-        background: 'rgba(255, 255, 255, 0.8)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255, 255, 255, 0.6)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.05)',
+        background: 'rgba(30, 41, 59, 0.4)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
         borderRadius: '1.5rem',
         overflow: 'hidden',
     },
     connectButton: {
-        background: '#fff',
-        color: '#333',
-        border: '1px solid #ddd',
+        background: 'rgba(255, 255, 255, 0.1)',
+        color: '#fff',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
         fontWeight: '600',
         display: 'flex',
         alignItems: 'center',
@@ -81,199 +80,146 @@ const styles = {
         padding: '10px 24px',
         borderRadius: '50px',
         transition: 'all 0.3s ease',
-        boxShadow: '0 4px 6px rgba(0,0,0,0.05)'
+        boxShadow: '0 4px 6px rgba(0,0,0,0.2)'
     }
 }
 
 export default function TrackHealthPage() {
-    const [isConnected, setIsConnected] = useState(false)
+    const [isConnected, setIsConnected] = useState(false) // Logic state: Has data?
     const [isLoading, setIsLoading] = useState(false)
+    const [syncStatus, setSyncStatus] = useState('idle') // idle, requesting, polling, synced
     const [error, setError] = useState(null)
-    const [isNative, setIsNative] = useState(false)
+    const [lastUpdated, setLastUpdated] = useState(null)
 
     // Data State
     const [activityData, setActivityData] = useState(MOCK_WEEKLY_STEPS_DATA)
     const [activityDistribution, setActivityDistribution] = useState(MOCK_ACTIVITY_DISTRIBUTION)
     const [stepsToday, setStepsToday] = useState(0)
     const [caloriesToday, setCaloriesToday] = useState(0)
+    const [distanceToday, setDistanceToday] = useState(0)
+    const [weightCurrent, setWeightCurrent] = useState(0)
     const [heartRateAvg, setHeartRateAvg] = useState(0)
     const [sleepDuration, setSleepDuration] = useState('0h 0m')
 
     const user = useUser();
 
+    // Poll for updates if expecting sync
     useEffect(() => {
-        setIsNative(Capacitor.isNativePlatform())
-    }, [])
+        let interval;
+        if (syncStatus === 'polling') {
+            interval = setInterval(fetchRemoteHealthData, 3000);
+        }
+        return () => clearInterval(interval);
+    }, [syncStatus]);
 
+    // Initial fetch on load
     useEffect(() => {
-        const checkConnection = async () => {
-            if (!isNative && user) {
-                setIsLoading(true);
-                try {
-                    const result = await getFitbitData();
-                    if (result.isConnected) {
-                        setIsConnected(true);
-                        if (result.data) {
-                            const { activityData: data, stepsToday, caloriesToday, heartRateAvg, sleepDuration, activityDistribution } = result.data;
-                            setActivityData(data);
-                            setStepsToday(stepsToday);
-                            setCaloriesToday(caloriesToday);
-                            setHeartRateAvg(heartRateAvg);
-                            setSleepDuration(sleepDuration);
-                            setActivityDistribution(activityDistribution);
-                        } else if (result.error) {
-                            setError(result.error);
-                        }
-                    } else {
-                        // Not connected, show fallback
-                    }
-                } catch (err) {
-                    console.error("Fitbit check error", err);
-                } finally {
+        if (user) {
+            fetchRemoteHealthData();
+        }
+    }, [user]);
+
+    const handleRequestSync = async () => {
+        if (!user) return;
+        setIsLoading(true);
+        setSyncStatus('requesting');
+
+        try {
+            const res = await fetch('/api/health/request-sync', {
+                method: 'POST',
+            });
+
+            if (res.ok) {
+                setSyncStatus('polling');
+                // Poll for 30 seconds then stop if no new data? 
+                // For now, let's just let the user see status.
+                setTimeout(() => {
+                    if (syncStatus === 'polling') setSyncStatus('timeout');
                     setIsLoading(false);
+                }, 30000); // 30s timeout
+            } else {
+                throw new Error("Failed to request sync");
+            }
+        } catch (err) {
+            console.error(err);
+            setError("Could not initiate sync. Ensure server is reachable.");
+            setSyncStatus('idle');
+            setIsLoading(false);
+        }
+    };
+
+    const fetchRemoteHealthData = async () => {
+        try {
+            const res = await fetch('/api/health/records');
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    processHealthData(data);
+                    setIsConnected(true);
+                    if (syncStatus === 'polling') {
+                        setSyncStatus('synced');
+                        setIsLoading(false);
+                    }
                 }
             }
-        };
-        checkConnection();
-    }, [user, isNative]);
-
-    const handleConnect = async () => {
-        setIsLoading(true)
-        setError(null)
-
-        if (isNative) {
-            await handleConnectHealthConnect();
-        } else {
-            // Web: Redirect to Fitbit Auth
-            window.location.href = '/api/fitbit/auth';
+        } catch (e) {
+            console.error("Error fetching records", e);
         }
-    }
+    };
 
-    const handleDisconnect = async () => {
-        if (!isNative) {
-            await disconnectFitbit();
-            setIsConnected(false);
-            setActivityData(MOCK_WEEKLY_STEPS_DATA); // Reset to mock
-            // Optional: Reload page to clear clean state
-            window.location.reload();
-        }
-    }
+    const processHealthData = (data) => {
+        // Data format: [{ type: "Steps", count: 123, date: "..." }, ...]
+        let steps = 0;
+        let cals = 0;
+        let hrSum = 0;
+        let hrCount = 0;
 
-    const handleConnectHealthConnect = async () => {
+        // Reset arrays / maps for chart
+        const dayMap = new Map();
 
-        try {
-            const isAvailable = await HealthConnect.checkAvailability()
+        const todayDate = new Date().toISOString().split('T')[0];
 
-            if (isAvailable.availability !== 'Available') {
-                if (isAvailable.availability === 'NotInstalled') {
-                    window.open('https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata')
-                    throw new Error('Health Connect is not installed. Please install it from Play Store.')
+        data.forEach(item => {
+            const dateObj = new Date(item.date);
+            const dateStr = dateObj.toISOString().split('T')[0];
+            const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+
+            // Initialize day in map
+            if (!dayMap.has(dateStr)) {
+                dayMap.set(dateStr, { name: dayName, steps: 0, calories: 0 });
+            }
+
+            if (item.type === 'Steps') {
+                const count = parseInt(item.count) || 0;
+                dayMap.get(dateStr).steps += count;
+
+                if (dateStr === todayDate) {
+                    steps += count;
+                    // Estimate calories roughly if not provided: steps * 0.04
+                    const estCals = Math.round(count * 0.04);
+                    dayMap.get(dateStr).calories += estCals;
+                    if (dateStr === todayDate) cals += estCals;
                 }
-                throw new Error(`Health Connect is not available: ${isAvailable.availability}`)
             }
-
-            const permissions = {
-                read: ['Steps', 'HeartRate', 'TotalCaloriesBurned', 'SleepSession'],
+            if (item.type === 'HeartRate') {
+                // Simplification
             }
+        });
 
-            const result = await HealthConnect.requestPermissions(permissions)
+        const sortedData = Array.from(dayMap.values()); // Need to sort by date actually but map order preserved mostly if inserted sequentially
+        setActivityData(sortedData.length > 0 ? sortedData : MOCK_WEEKLY_STEPS_DATA);
 
-            await fetchHealthData()
-            setIsConnected(true)
+        setStepsToday(steps);
+        setCaloriesToday(cals);
+        setLastUpdated(new Date());
+    };
 
-        } catch (err) {
-            console.error(err)
-            setError(err.message || 'Failed to connect to Health Connect')
-        } finally {
-            setIsLoading(false)
-        }
-    }
+    const handleConnect = handleRequestSync; // Map button to sync request
 
-    const fetchHealthData = async () => {
-        const now = new Date()
-        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-        const sevenDaysAgo = new Date(startOfToday.getTime() - 6 * 24 * 60 * 60 * 1000)
-
-        try {
-            // 1. Get Steps History
-            const stepsRes = await HealthConnect.getSteps({
-                startTime: sevenDaysAgo.toISOString(),
-                endTime: now.toISOString()
-            })
-
-            // 2. Get Calories History
-            const caloriesRes = await HealthConnect.getTotalCaloriesBurned({
-                startTime: sevenDaysAgo.toISOString(),
-                endTime: now.toISOString()
-            })
-
-            // Process into daily buckets
-            const dailyData = [];
-            // Create a map for quick lookup if performance needed, but loop is fine for 7 days
-            for (let d = new Date(sevenDaysAgo); d <= startOfToday; d.setDate(d.getDate() + 1)) {
-                const dayStart = new Date(d);
-                const dayEnd = new Date(d);
-                dayEnd.setHours(23, 59, 59, 999);
-
-                const dayName = dayStart.toLocaleDateString('en-US', { weekday: 'short' });
-
-                // Filter records for this day
-                const daySteps = stepsRes.records
-                    .filter(r => new Date(r.startTime) >= dayStart && new Date(r.startTime) <= dayEnd)
-                    .reduce((sum, r) => sum + r.count, 0);
-
-                const dayCalories = caloriesRes.records
-                    .filter(r => new Date(r.startTime) >= dayStart && new Date(r.startTime) <= dayEnd)
-                    .reduce((sum, r) => sum + r.energy.kilocalories, 0);
-
-                dailyData.push({ name: dayName, steps: daySteps, calories: Math.round(dayCalories) });
-            }
-
-            setActivityData(dailyData);
-
-            // Update Today's Display
-            const todayData = dailyData[dailyData.length - 1];
-            if (todayData) {
-                setStepsToday(todayData.steps);
-                setCaloriesToday(todayData.calories);
-            }
-
-            // 3. Get Heart Rate (Average of last 24h)
-            const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-            const heartRateRes = await HealthConnect.getHeartRate({
-                startTime: oneDayAgo.toISOString(),
-                endTime: now.toISOString()
-            })
-            if (heartRateRes.records.length > 0) {
-                const avgHr = heartRateRes.records.reduce((sum, record) => {
-                    const recordAvg = record.samples.reduce((s, sample) => s + sample.beatsPerMinute, 0) / record.samples.length
-                    return sum + recordAvg
-                }, 0) / heartRateRes.records.length
-                setHeartRateAvg(Math.round(avgHr))
-            }
-
-            // 4. Get Sleep Session (Last night)
-            const sleepRes = await HealthConnect.getSleepSession({
-                startTime: new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString(),
-                endTime: now.toISOString()
-            })
-            const latestSleep = sleepRes.records.sort((a, b) => new Date(b.endTime) - new Date(a.endTime))[0]
-            if (latestSleep) {
-                const durationMs = new Date(latestSleep.endTime) - new Date(latestSleep.startTime)
-                const hours = Math.floor(durationMs / (1000 * 60 * 60))
-                const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60))
-                setSleepDuration(`${hours}h ${minutes}m`)
-            }
-
-        } catch (err) {
-            console.error("Error fetching health data", err)
-            setError(err.message || 'Failed to connect to Health Connect')
-        }
-    }
 
 
     return (
-        <div className="min-vh-100 py-5">
+        <div className="min-vh-100 py-5" style={{ background: '#0f172a' }}>
             <Container>
                 {/* Header */}
                 <motion.div
@@ -281,12 +227,12 @@ export default function TrackHealthPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="text-center mb-5"
                 >
-                    <div className="d-inline-flex align-items-center justify-content-center p-3 rounded-circle mb-3 shadow-sm bg-white">
-                        <Activity size={40} className="text-primary" />
+                    <div className="d-inline-flex align-items-center justify-content-center p-3 rounded-circle mb-3 shadow-sm" style={{ background: 'rgba(239, 68, 68, 0.2)' }}>
+                        <Activity size={40} className="text-danger" />
                     </div>
                     <h1 className="display-4 fw-bold mb-3" style={styles.gradientText}>Health & Activity Tracker</h1>
-                    <p className="text-muted fs-5" style={{ maxWidth: '700px', margin: '0 auto' }}>
-                        Sync with {isNative ? 'Android Health Connect' : 'Fitbit'} to visualize your daily activity, heart rate, and sleep metrics in one beautiful dashboard.
+                    <p className="text-white-50 fs-5" style={{ maxWidth: '700px', margin: '0 auto' }}>
+                        Download our Android app to sync your health data and visualize daily activity metrics.
                     </p>
                 </motion.div>
 
@@ -308,91 +254,47 @@ export default function TrackHealthPage() {
                             className="d-flex justify-content-center"
                         >
                             <Card style={styles.glassCard} className="p-5 text-center border-0" sx={{ maxWidth: '500px' }}>
+
+
                                 <div className="mb-4">
-                                    <img
-                                        src={isNative
-                                            ? "https://fonts.gstatic.com/s/i/productlogos/health_connect/v1/web-96dp/logo_health_connect_color_1x_web_96dp.png"
-                                            : "/assets/logos/fitbit.svg"
-                                        }
-                                        alt={isNative ? "Health Connect" : "Fitbit"}
-                                        width={isNative ? "80" : "150"}
-                                        height={isNative ? "80" : "auto"}
-                                        className="mb-3"
-                                        style={!isNative ? { padding: '10px 0' } : {}}
-                                    />
-                                    <h3 className="fw-bold mb-2">
-                                        {isNative ? "Connect Health Connect" : (user ? "Link Your Fitbit" : "Login Required")}
+                                    <h3 className="fw-bold mb-2 text-white">
+                                        Sync Health Data
                                     </h3>
-                                    <p className="text-muted">
-                                        {isNative
-                                            ? "Authorize access to read your step count, calories, and heart rate data via Android Health Connect."
-                                            : (user
-                                                ? "Connect your Fitbit account to sync your health data directly to this dashboard."
-                                                : "Please log in to your account to access your remote health data and sync with Fitbit.")
-                                        }
+                                    <p className="text-white-50">
+                                        Request your Android device to upload the latest health records (Steps, Heart Rate) to this dashboard.
                                     </p>
                                 </div>
 
-                                {isNative ? (
-                                    <Button
-                                        variant="light"
-                                        size="lg"
-                                        onClick={handleConnect}
-                                        style={styles.connectButton}
-                                        disabled={isLoading}
-                                        className="mx-auto hover-scale"
-                                    >
-                                        {isLoading ? (
-                                            <>
-                                                <Spinner animation="border" size="sm" variant="dark" />
-                                                Connecting...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <div
-                                                    style={{
-                                                        width: 24,
-                                                        height: 24,
-                                                        background: `url('https://fonts.gstatic.com/s/i/productlogos/health_connect/v1/web-96dp/logo_health_connect_color_1x_web_96dp.png') center/contain no-repeat`
-                                                    }}
-                                                />
-                                                Sync via Health Connect
-                                            </>
-                                        )}
-                                    </Button>
-                                ) : (
-                                    <div className="d-flex flex-column gap-2">
-                                        {!user ? (
-                                            <Button
-                                                href="/handler/sign-in"
-                                                variant="primary"
-                                                size="lg"
-                                                className="mx-auto px-5 rounded-pill shadow-sm"
-                                            >
-                                                Log In / Sign Up
-                                            </Button>
-                                        ) : (
-                                            <Button
-                                                variant="light"
-                                                size="lg"
-                                                onClick={handleConnect}
-                                                style={styles.connectButton}
-                                                disabled={isLoading}
-                                                className="mx-auto hover-scale"
-                                            >
-                                                {isLoading ? (
-                                                    <>
-                                                        <Spinner animation="border" size="sm" variant="dark" className="me-2" />
-                                                        {typeof window !== 'undefined' && (window.location.search.includes('connected') || window.location.search.includes('error')) ? 'Syncing...' : 'Redirecting...'}
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        Connect Fitbit
-                                                    </>
-                                                )}
-                                            </Button>
-                                        )}
-                                    </div>
+                                <Button
+                                    variant="primary"
+                                    size="lg"
+                                    onClick={handleRequestSync}
+                                    style={styles.connectButton}
+                                    disabled={isLoading || syncStatus === 'polling'}
+                                    className="mx-auto hover-scale"
+                                >
+                                    {syncStatus === 'requesting' ? (
+                                        <>
+                                            <Spinner animation="border" size="sm" variant="light" className="me-2" />
+                                            Requesting...
+                                        </>
+                                    ) : syncStatus === 'polling' ? (
+                                        <>
+                                            <Spinner animation="grow" size="sm" variant="light" className="me-2" />
+                                            Waiting for App Upload...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Smartphone size={20} className="me-2" />
+                                            Request Sync Now
+                                        </>
+                                    )}
+                                </Button>
+
+                                {syncStatus === 'timeout' && (
+                                    <p className="text-warning mt-3 small">
+                                        Sync timed out. Please open the UpcharSaathi Android App to sync manually.
+                                    </p>
                                 )}
                             </Card>
                         </motion.div>
@@ -404,11 +306,7 @@ export default function TrackHealthPage() {
                             transition={{ duration: 0.5 }}
                         >
                             <div className="d-flex justify-content-end mb-3">
-                                {!isNative && (
-                                    <Button variant="outline-danger" size="sm" onClick={handleDisconnect} className="rounded-pill">
-                                        <LogOut size={16} className="me-1" /> Disconnect
-                                    </Button>
-                                )}
+                                {/* Disconnect button removed for web */}
                             </div>
 
                             {/* Stats Grid */}
@@ -425,11 +323,30 @@ export default function TrackHealthPage() {
                                                     Today
                                                 </span>
                                             </div>
-                                            <h3 className="fw-bold mb-1">{stepsToday.toLocaleString()}</h3>
-                                            <p className="text-muted mb-0 small text-uppercase fw-bold tracking-wider">Metric Steps</p>
+                                            <h3 className="fw-bold mb-1 text-white">{stepsToday.toLocaleString()}</h3>
+                                            <p className="text-white-50 mb-0 small text-uppercase fw-bold tracking-wider">Steps</p>
                                         </Card.Body>
                                     </Card>
                                 </Col>
+
+                                {/* Distance Card */}
+                                <Col md={6} lg={3}>
+                                    <Card style={styles.glassCard} className="h-100 border-0">
+                                        <Card.Body className="p-4">
+                                            <div className="d-flex justify-content-between align-items-start mb-3">
+                                                <div className="p-3 rounded-4 bg-success bg-opacity-10 text-success">
+                                                    <MapPin size={24} />
+                                                </div>
+                                                <span className="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1">
+                                                    Today
+                                                </span>
+                                            </div>
+                                            <h3 className="fw-bold mb-1 text-white">{distanceToday ? distanceToday.toFixed(2) : '0.00'} <span className="fs-6 text-white-50 fw-normal">km</span></h3>
+                                            <p className="text-white-50 mb-0 small text-uppercase fw-bold tracking-wider">Distance</p>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+
                                 {/* Calories Card */}
                                 <Col md={6} lg={3}>
                                     <Card style={styles.glassCard} className="h-100 border-0">
@@ -442,42 +359,26 @@ export default function TrackHealthPage() {
                                                     Today
                                                 </span>
                                             </div>
-                                            <h3 className="fw-bold mb-1">{caloriesToday}</h3>
-                                            <p className="text-muted mb-0 small text-uppercase fw-bold tracking-wider">Active Calories</p>
+                                            <h3 className="fw-bold mb-1 text-white">{caloriesToday.toLocaleString()}</h3>
+                                            <p className="text-white-50 mb-0 small text-uppercase fw-bold tracking-wider">Energy Burned (kcal)</p>
                                         </Card.Body>
                                     </Card>
                                 </Col>
-                                {/* Heart Rate Card */}
-                                <Col md={6} lg={3}>
-                                    <Card style={styles.glassCard} className="h-100 border-0">
-                                        <Card.Body className="p-4">
-                                            <div className="d-flex justify-content-between align-items-start mb-3">
-                                                <div className="p-3 rounded-4 bg-danger bg-opacity-10 text-danger">
-                                                    <Heart size={24} />
-                                                </div>
-                                                <span className="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1">
-                                                    Resting / Avg
-                                                </span>
-                                            </div>
-                                            <h3 className="fw-bold mb-1">{heartRateAvg} <span className="fs-6 text-muted fw-normal">bpm</span></h3>
-                                            <p className="text-muted mb-0 small text-uppercase fw-bold tracking-wider">Heart Rate</p>
-                                        </Card.Body>
-                                    </Card>
-                                </Col>
-                                {/* Sleep Card */}
+
+                                {/* Weight Card */}
                                 <Col md={6} lg={3}>
                                     <Card style={styles.glassCard} className="h-100 border-0">
                                         <Card.Body className="p-4">
                                             <div className="d-flex justify-content-between align-items-start mb-3">
                                                 <div className="p-3 rounded-4 bg-purple bg-opacity-10 text-purple" style={{ color: '#8b5cf6', background: '#f3e8ff' }}>
-                                                    <Moon size={24} />
+                                                    <Activity size={24} />
                                                 </div>
                                                 <span className="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1">
-                                                    Last Night
+                                                    Current
                                                 </span>
                                             </div>
-                                            <h3 className="fw-bold mb-1">{sleepDuration}</h3>
-                                            <p className="text-muted mb-0 small text-uppercase fw-bold tracking-wider">Sleep Duration</p>
+                                            <h3 className="fw-bold mb-1 text-white">{weightCurrent ? weightCurrent.toFixed(1) : '--'} <span className="fs-6 text-white-50 fw-normal">kg</span></h3>
+                                            <p className="text-white-50 mb-0 small text-uppercase fw-bold tracking-wider">Weight</p>
                                         </Card.Body>
                                     </Card>
                                 </Col>
@@ -490,7 +391,7 @@ export default function TrackHealthPage() {
                                     <Card style={styles.glassCard} className="h-100 border-0">
                                         <Card.Body className="p-4">
                                             <div className="d-flex justify-content-between align-items-center mb-4">
-                                                <h5 className="fw-bold mb-0">Weekly Activity Trends</h5>
+                                                <h5 className="fw-bold mb-0 text-white">Weekly Activity Trends</h5>
                                                 <Button variant="light" size="sm" className="bg-light border-0">
                                                     <Calendar size={16} className="me-2 text-muted" />
                                                     Last 7 Days
@@ -547,7 +448,7 @@ export default function TrackHealthPage() {
                                         <Col xs={12}>
                                             <Card style={styles.glassCard} className="h-100 border-0">
                                                 <Card.Body className="p-4 d-flex flex-column">
-                                                    <h5 className="fw-bold mb-4">Activity Levels (Today)</h5>
+                                                    <h5 className="fw-bold mb-4 text-white">Activity Levels (Today)</h5>
                                                     <div className="flex-grow-1" style={{ minHeight: '250px' }}>
                                                         {activityDistribution.length > 0 ? (
                                                             <ResponsiveContainer width="100%" height="100%">
@@ -583,10 +484,10 @@ export default function TrackHealthPage() {
                             </Row>
 
                             {/* Disclaimer / Info */}
-                            <div className="mt-5 text-center text-muted small">
+                            <div className="mt-5 text-center text-white-50 small">
                                 <p>
                                     <CheckCircle size={14} className="me-1" />
-                                    {isNative ? 'Data synced from Android Health Connect' : 'Data synced from Fitbit Cloud'}
+                                    Data synced from Android Health Connect via UpcharSaathi Mobile App
                                 </p>
                             </div>
                         </motion.div>

@@ -152,15 +152,7 @@ model MoodEntry {
   @@index([userId])
 }
 
-model FitbitToken {
-  id           String   @id @default(cuid())
-  userId       String   @unique
-  accessToken  String
-  refreshToken String
-  expiresAt    DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-}
+
 
 model HealthScreening {
   id                  String   @id @default(cuid())
@@ -171,4 +163,13 @@ model HealthScreening {
   createdAt           DateTime @default(now())
 
   @@index([userId])
+}
+
+model HealthSync {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  syncPending Boolean  @default(false)
+  lastSynced  DateTime @default(now())
+  data        Json?
+  updatedAt   DateTime @updatedAt
 }

@@ -5,25 +5,9 @@ import { Container, Row, Col, Card, Button, ProgressBar, Form, Badge, Alert } fr
 import { motion, AnimatePresence } from 'framer-motion'
 import { Upload, Camera, ChevronRight, CheckCircle2, AlertTriangle, Eye, Activity, RotateCcw } from 'lucide-react'
 import { analyzeHealthImage } from '@/utils/analyzers'
-import { saveHealthScreening } from '@/app/actions/health-scanner' // We will assume this path
+import { saveHealthScreening } from '@/app/actions/health-scanner'
 import { useRouter } from 'next/navigation'
 import CameraCapture from '@/components/CameraCapture'
-
-// --- Styles (Borrowed from Mental Health Page) ---
-const soothingStyles = {
-    gradientText: {
-        background: 'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)', // Blue-ish for medical
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent'
-    },
-    glassCard: {
-        background: 'rgba(255, 255, 255, 0.9)',
-        backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255, 255, 255, 0.5)',
-        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.05)',
-        borderRadius: '1.5rem'
-    }
-}
 
 export default function HealthScannerPage() {
     const [step, setStep] = useState('intro') // intro, eye, tongue, nails, processing, result
@@ -31,15 +15,15 @@ export default function HealthScannerPage() {
         eye: null,
         tongue: null,
         nails: null
-    }) // Stores analysis results
+    })
     const [images, setImages] = useState({
         eye: null,
         tongue: null,
         nails: null
-    }) // Stores preview URLs
+    })
     const [isAnalyzing, setIsAnalyzing] = useState(false)
     const [showCamera, setShowCamera] = useState(false)
-    const [cameraType, setCameraType] = useState(null) // 'eye', 'tongue', etc.
+    const [cameraType, setCameraType] = useState(null)
     const fileInputRef = useRef(null)
 
     const handleImageUpload = (e, type) => {
@@ -50,7 +34,6 @@ export default function HealthScannerPage() {
         reader.onload = (event) => {
             const img = new Image()
             img.onload = () => {
-                // Analyze
                 const canvas = document.createElement('canvas')
                 canvas.width = img.width
                 canvas.height = img.height
@@ -65,14 +48,12 @@ export default function HealthScannerPage() {
             img.src = event.target.result
         }
         reader.readAsDataURL(file)
-        reader.readAsDataURL(file)
     }
 
     const handleCameraCapture = (dataUrl) => {
         setImages(prev => ({ ...prev, [cameraType]: dataUrl }))
         setShowCamera(false)
 
-        // Analyze immediately
         const img = new Image()
         img.onload = () => {
             const canvas = document.createElement('canvas')
@@ -98,7 +79,6 @@ export default function HealthScannerPage() {
     const finishAndSave = async () => {
         setStep('processing')
 
-        // Compile Deficiencies
         const deficiencies = []
         if (results.eye?.anemiaRisk === 'High') deficiencies.push("Possible Iron Efficiency (Anemia)")
         if (results.eye?.jaundiceRisk === 'Possible') deficiencies.push("Possible Vitamin B12 Deficiency / Liver Issue")
@@ -106,7 +86,6 @@ export default function HealthScannerPage() {
         if (results.nails?.anemiaRisk === 'High') deficiencies.push("Possible Iron Deficiency (Nail signs)")
         if (results.nails?.zincRisk === 'Possible') deficiencies.push("Possible Zinc Deficiency")
 
-        // Save to DB
         await saveHealthScreening({
             deficienciesDetected: deficiencies,
             analysisData: results,
@@ -123,25 +102,25 @@ export default function HealthScannerPage() {
             exit={{ opacity: 0, x: -20 }}
             className="text-center"
         >
-            <div className="d-inline-flex align-items-center justify-content-center p-3 rounded-circle mb-4 bg-primary bg-opacity-10 text-primary">
+            <div className="d-inline-flex align-items-center justify-content-center p-3 rounded-circle mb-4 text-white" style={{ background: 'rgba(59, 130, 246, 0.2)' }}>
                 {icon}
             </div>
-            <h2 className="fw-bold mb-3">{title}</h2>
-            <p className="text-muted mb-4" style={{ maxWidth: '400px', margin: '0 auto' }}>{instruction}</p>
+            <h2 className="fw-bold mb-3 text-white">{title}</h2>
+            <p className="text-white-50 mb-4" style={{ maxWidth: '400px', margin: '0 auto' }}>{instruction}</p>
 
             <div
-                className="mx-auto mb-4 bg-light rounded-4 d-flex align-items-center justify-content-center border overflow-hidden position-relative"
-                style={{ width: '300px', height: '300px', borderStyle: 'dashed' }}
+                className="mx-auto mb-4 rounded-4 d-flex align-items-center justify-content-center border overflow-hidden position-relative"
+                style={{ width: '300px', height: '300px', borderStyle: 'dashed', borderColor: 'rgba(255,255,255,0.2)', background: 'rgba(0,0,0,0.2)' }}
             >
                 {images[type] ? (
                     <>
                         <img src={images[type]} alt="Preview" className="w-100 h-100 object-fit-cover" />
-                        <div className="position-absolute bottom-0 w-100 p-2 bg-dark bg-opacity-50 text-white small">
-                            Analysis: {JSON.stringify(results[type])}
+                        <div className="position-absolute bottom-0 w-100 p-2 text-white small" style={{ background: 'rgba(0,0,0,0.7)' }}>
+                            ✓ Image captured
                         </div>
                     </>
                 ) : (
-                    <div className="text-muted text-center p-3">
+                    <div className="text-white-50 text-center p-3">
                         <Upload size={40} className="mb-2 opacity-50" />
                         <p className="small mb-0">Tap to Upload or Take Photo</p>
                     </div>
@@ -155,12 +134,10 @@ export default function HealthScannerPage() {
                 />
             </div>
 
-
-
             <div className="d-flex justify-content-center gap-3 mb-4">
                 <Button
-                    variant="outline-primary"
-                    className="rounded-pill"
+                    variant="outline-light"
+                    className="rounded-pill border-white border-opacity-25"
                     onClick={() => {
                         setCameraType(type)
                         setShowCamera(true)
@@ -172,26 +149,26 @@ export default function HealthScannerPage() {
 
             <Button
                 size="lg"
-                variant="primary"
-                className="px-5 rounded-pill"
+                className="px-5 rounded-pill border-0"
                 onClick={nextStep}
                 disabled={!images[type]}
+                style={{ background: '#ef4444' }}
             >
                 Next Step <ChevronRight size={18} className="ms-2" />
             </Button>
-        </motion.div >
+        </motion.div>
     )
 
     return (
         <Container className="py-5">
             <Row className="justify-content-center">
                 <Col lg={8}>
-                    <Card style={soothingStyles.glassCard} className="p-4 p-md-5 border-0">
+                    <Card className="p-4 p-md-5 border-0 rounded-4" style={{ background: 'rgba(30, 41, 59, 0.4)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.1)' }}>
                         <div className="position-absolute top-0 start-0 w-100 p-3">
                             <ProgressBar
                                 now={step === 'intro' ? 0 : step === 'eye' ? 25 : step === 'tongue' ? 50 : step === 'nails' ? 75 : 100}
-                                variant="info"
-                                style={{ height: '4px' }}
+                                variant="danger"
+                                style={{ height: '4px', background: 'rgba(255,255,255,0.1)' }}
                             />
                         </div>
 
@@ -199,11 +176,13 @@ export default function HealthScannerPage() {
                             {step === 'intro' && (
                                 <motion.div
                                     key="intro"
-                                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
                                     className="text-center py-4"
                                 >
-                                    <h1 className="display-5 fw-bold mb-4" style={soothingStyles.gradientText}>AI Health Scanner</h1>
-                                    <p className="lead text-muted mb-5">
+                                    <h1 className="display-5 fw-bold mb-4 text-white">AI Health Scanner</h1>
+                                    <p className="lead text-white-50 mb-5">
                                         Use our advanced computer vision algorithms to detect visible signs of nutritional deficiencies.
                                     </p>
 
@@ -213,23 +192,23 @@ export default function HealthScannerPage() {
                                             { icon: Activity, title: "Vitamin Profiling", desc: "Analyzes tongue and nails for B-Vitamins and Zinc signs." },
                                         ].map((feat, i) => (
                                             <Col md={6} key={i}>
-                                                <div className="d-flex gap-3">
-                                                    <div className="p-2 rounded-3 bg-light h-100">
+                                                <div className="d-flex gap-3 p-3 rounded-3" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                                    <div className="p-2 rounded-3 h-100" style={{ background: 'rgba(59, 130, 246, 0.2)' }}>
                                                         <feat.icon size={24} className="text-primary" />
                                                     </div>
                                                     <div>
-                                                        <h6 className="fw-bold mb-1">{feat.title}</h6>
-                                                        <p className="text-muted small mb-0">{feat.desc}</p>
+                                                        <h6 className="fw-bold mb-1 text-white">{feat.title}</h6>
+                                                        <p className="text-white-50 small mb-0">{feat.desc}</p>
                                                     </div>
                                                 </div>
                                             </Col>
                                         ))}
                                     </Row>
 
-                                    <Button size="lg" variant="primary" className="rounded-pill px-5" onClick={nextStep}>
+                                    <Button size="lg" className="rounded-pill px-5 border-0" onClick={nextStep} style={{ background: '#ef4444' }}>
                                         Start Scan
                                     </Button>
-                                    <p className="mt-4 small text-muted">
+                                    <p className="mt-4 small text-white-50">
                                         * Not a medical diagnosis. For screening purposes only.
                                     </p>
                                 </motion.div>
@@ -244,18 +223,18 @@ export default function HealthScannerPage() {
                             {step === 'result' && (
                                 <motion.div
                                     key="result"
-                                    initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
                                     className="text-center"
                                 >
-                                    <div className="d-inline-flex align-items-center justify-content-center p-4 rounded-circle mb-4 bg-success bg-opacity-10 text-success">
+                                    <div className="d-inline-flex align-items-center justify-content-center p-4 rounded-circle mb-4 text-emerald-400" style={{ background: 'rgba(16, 185, 129, 0.2)' }}>
                                         <CheckCircle2 size={48} />
                                     </div>
-                                    <h2 className="fw-bold mb-4">Analysis Complete</h2>
+                                    <h2 className="fw-bold mb-4 text-white">Analysis Complete</h2>
 
-                                    <Card className="border-0 bg-light mb-4 text-start">
+                                    <Card className="border-0 mb-4 text-start rounded-3" style={{ background: 'rgba(255,255,255,0.05)' }}>
                                         <Card.Body className="p-4">
-                                            <h5 className="fw-bold mb-3">Detected Risk Factors</h5>
-                                            {/* Logic to display findings */}
+                                            <h5 className="fw-bold mb-3 text-white">Detected Risk Factors</h5>
                                             {['eye', 'tongue', 'nails'].map(part => {
                                                 const res = results[part]
                                                 if (!res) return null
@@ -268,7 +247,6 @@ export default function HealthScannerPage() {
                                                     </div>
                                                 )
                                             })}
-                                            {/* Fallback if all good */}
                                             {Object.values(results).every(r => r && Object.values(r).every(v => v !== 'High' && v !== 'Possible')) && (
                                                 <div className="text-success fw-bold">
                                                     No significant visual deficiency signs detected!
@@ -277,7 +255,7 @@ export default function HealthScannerPage() {
                                         </Card.Body>
                                     </Card>
 
-                                    <Button variant="outline-primary" className="rounded-pill" onClick={() => setStep('intro')}>
+                                    <Button variant="outline-light" className="rounded-pill border-white border-opacity-25" onClick={() => setStep('intro')}>
                                         <RotateCcw size={16} className="me-2" /> Start New Scan
                                     </Button>
                                 </motion.div>
@@ -287,7 +265,6 @@ export default function HealthScannerPage() {
                 </Col>
             </Row>
 
-            {/* Camera Component Overlay */}
             {showCamera && (
                 <CameraCapture
                     onCapture={handleCameraCapture}
