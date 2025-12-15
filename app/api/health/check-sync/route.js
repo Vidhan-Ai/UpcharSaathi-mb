@@ -2,14 +2,8 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { verifyAndGetUser } from '@/lib/googleAuth';
 
-// 1. Rename 'handler' to 'GET'
-// 2. The argument is 'request', not 'req, res'
 export async function GET(request) {
 
-    // 3. No need to check req.method !== 'GET'. 
-    // The function name 'GET' guarantees this only runs for GET requests.
-
-    // 4. Verify Google Token (Pass the 'request' object directly)
     const user = await verifyAndGetUser(request);
 
     if (!user) {
