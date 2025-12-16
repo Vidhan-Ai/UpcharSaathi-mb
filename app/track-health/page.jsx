@@ -154,50 +154,58 @@ export default function TrackHealthPage() {
     };
 
     const processHealthData = (data) => {
-        // Data format: [{ type: "Steps", count: 123, date: "..." }, ...]
         let steps = 0;
         let cals = 0;
-        let hrSum = 0;
-        let hrCount = 0;
+        let dist = 0;
 
-        // Reset arrays / maps for chart
         const dayMap = new Map();
-
         const todayDate = new Date().toISOString().split('T')[0];
 
         data.forEach(item => {
+            if (!item.date) return;
             const dateObj = new Date(item.date);
             const dateStr = dateObj.toISOString().split('T')[0];
             const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
 
-            // Initialize day in map
             if (!dayMap.has(dateStr)) {
-                dayMap.set(dateStr, { name: dayName, steps: 0, calories: 0 });
+                dayMap.set(dateStr, { name: dayName, steps: 0, calories: 0, distance: 0, date: dateStr });
             }
+
+            const dayEntry = dayMap.get(dateStr);
+            const val = item.value || 0;
+            const count = item.count || 0;
 
             if (item.type === 'Steps') {
-                const count = parseInt(item.count) || 0;
-                dayMap.get(dateStr).steps += count;
-
-                if (dateStr === todayDate) {
-                    steps += count;
-                    // Estimate calories roughly if not provided: steps * 0.04
-                    const estCals = Math.round(count * 0.04);
-                    dayMap.get(dateStr).calories += estCals;
-                    if (dateStr === todayDate) cals += estCals;
-                }
+                dayEntry.steps += count;
+            } else if (item.type === 'Calories' || item.type === 'TotalCaloriesBurned') {
+                dayEntry.calories += val;
+            } else if (item.type === 'Distance') {
+                dayEntry.distance += val;
             }
-            if (item.type === 'HeartRate') {
-                // Simplification
+
+            // Accumulate Today's stats
+            if (dateStr === todayDate) {
+                if (item.type === 'Steps') steps += count;
+                if (item.type === 'Calories' || item.type === 'TotalCaloriesBurned') cals += val;
+                if (item.type === 'Distance') dist += val;
             }
         });
 
-        const sortedData = Array.from(dayMap.values()); // Need to sort by date actually but map order preserved mostly if inserted sequentially
-        setActivityData(sortedData);
+        // Convert to array and sort by date ascending for the chart
+        const sortedData = Array.from(dayMap.values()).sort((a, b) => new Date(a.date) - new Date(b.date));
 
+        setActivityData(sortedData);
         setStepsToday(steps);
-        setCaloriesToday(cals);
+        setCaloriesToday(Math.round(cals));
+        setDistanceToday(dist / 1000); // Convert meters to km
         setLastUpdated(new Date());
+
+        // Simple distribution if we have activity
+        if (steps > 0 || cals > 0) {
+            setActivityDistribution([
+                { name: 'Active', value: 100, color: '#3b82f6' }
+            ]);
+        }
     };
 
     const handleConnect = handleRequestSync; // Map button to sync request

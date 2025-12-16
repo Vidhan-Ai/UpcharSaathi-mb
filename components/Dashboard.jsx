@@ -11,7 +11,8 @@ import {
     Brain,
     FileText,
     Video,
-    ArrowRight
+    ArrowRight,
+    Calculator
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -101,6 +102,15 @@ const Dashboard = ({ user }) => {
             bg: "bg-info",
             href: "/ai-health-insights",
             tag: "New"
+        },
+        {
+            title: "Wellness Tools",
+            desc: "Smart calculators for BMI, Hydration, and personalized health reports to keep you on track.",
+            icon: Calculator,
+            color: "text-primary",
+            bg: "bg-primary",
+            href: "/health-tools",
+            tag: "Updated"
         },
         {
             title: "First Aid Guide",
